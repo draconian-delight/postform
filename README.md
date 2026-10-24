@@ -6,7 +6,7 @@ A small offline formatter for LinkedIn and X. Paste a draft, keep its bold and i
 
 ## Use it
 
-Download [Postform.html](dist/Postform.html) using GitHub’s **Download raw file** button, then open it in your browser. The app is one HTML file: no installation, account, or server required.
+Download [Postform.html](https://github.com/draconian-delight/postform/releases/latest/download/Postform.html) and open it in your browser. You can also download the [ZIP with a quick start guide](https://github.com/draconian-delight/postform/releases/latest/download/Postform.zip). The app is one HTML file: no installation, account, or server required.
 
 1. Paste Markdown or a formatted draft into the editor.
 2. Edit visually. Select text to add bold, italics, lists, or links.
