@@ -1,0 +1,912 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Format LinkedIn and X posts. Edit visually and copy Unicode bold, bold numbers, italics, and clean spacing.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Postform — format your post</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%234338ca'/%3E%3Ctext x='32' y='46' text-anchor='middle' font-family='Arial,sans-serif' font-size='43' font-weight='700' fill='white'%3EP%3C/text%3E%3C/svg%3E">
+  <style>:root{color-scheme:light;--background:#eff1f7;--surface:#fff;--ink:#1c2438;--muted:#526078;--line:#cbd2e1;--primary:#4934bd;--primary-hover:#372496;--accent-soft:#ebe6ff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0;background:var(--background);color:var(--ink)}button,textarea,select,input{font:inherit}button,select,summary{cursor:pointer}button{color:inherit}button,select,input,textarea,summary,a{-webkit-tap-highlight-color:transparent}button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--primary);outline-offset:3px}button:disabled{cursor:default}svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}.app{width:100%;max-width:1320px;margin:auto;padding:0 40px 30px}.masthead{height:88px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-size:23px;font-weight:700;letter-spacing:-.7px}.brand-mark{width:34px;height:36px;display:inline-flex;align-items:center;justify-content:center;background:var(--primary);color:#fff;border-radius:10px;font-size:23px;letter-spacing:0}.platform-label{font-size:14px;color:var(--muted)}.page-heading{padding:20px 0 25px}.page-heading h1{font-size:30px;font-weight:650;letter-spacing:-.8px;line-height:1.2;margin:0}.page-heading p{font-size:15px;line-height:1.5;color:var(--muted);margin:9px 0 0}.editors{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}.editor-card{min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 3px 12px #22345705;display:flex;flex-direction:column}.source-card:focus-within{border-color:#8279df;box-shadow:0 0 0 2px #4338ca14}.card-top{height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 24px;flex-shrink:0}.card-top h2{font-size:17px;font-weight:650;letter-spacing:-.2px;margin:0}.text-button{border:0;background:transparent;display:inline-flex;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-size:13px;font-weight:500;padding:8px 4px;min-height:36px;white-space:nowrap;border-radius:5px}.text-button:hover{color:var(--primary);text-decoration:underline;text-underline-offset:3px}.text-button:disabled{color:var(--muted);text-decoration:none}.editor-toolbar{height:58px;display:flex;align-items:center;gap:4px;margin:0 24px;padding:0 0 13px;border-bottom:1px solid #e0e5ef;flex-shrink:0}.format-button{width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;padding:6px;border:1px solid transparent;background:transparent;color:#34435b;border-radius:7px;font-size:17px}.format-button:hover{background:#f0f2f8;border-color:#d7deeb}.format-button[aria-pressed=true]{background:var(--accent-soft);color:#30218f;border-color:#bdb7ec}.format-button strong{font-family:Arial,sans-serif;font-size:18px}.format-button em{font-family:Georgia,serif;font-size:21px}.format-button#clearFormat{font-size:15px}.toolbar-divider{width:1px;height:20px;background:var(--line);margin:0 8px}.rich-editor{height:440px;min-height:180px;overflow:auto;resize:vertical;padding:22px 24px 30px;outline:0;font-family:Inter,"Segoe UI","Segoe UI Emoji",Arial,sans-serif;font-size:16px;line-height:1.8;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere;scrollbar-width:thin;scrollbar-color:#b5bfd2 transparent}.rich-editor.is-empty:before{content:attr(data-placeholder);color:#626f84;pointer-events:none;float:left;height:0}.rich-editor p{margin:0 0 1em}.rich-editor p:last-child{margin-bottom:0}.rich-editor ul,.rich-editor ol{margin:0 0 1em;padding-left:1.4em}.rich-editor li{margin:0}.rich-editor strong,.rich-editor b{font-weight:700}.rich-editor em,.rich-editor i{font-style:italic}.rich-editor a{color:#4338ca;text-decoration:underline;text-underline-offset:3px;cursor:pointer}.rich-editor code,.rich-editor pre{font-family:Consolas,"Courier New",monospace;font-size:.9em;background:#eef0f7;border-radius:4px}.rich-editor code{padding:2px 4px}.rich-editor pre{white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;margin:0 0 1em}.output-card{background:#fafaff}.output-heading{padding-right:20px}.button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:10px 15px;border-radius:8px;border:1px solid transparent;font-size:14px;font-weight:600;white-space:nowrap}.button-primary{background:var(--primary);color:#fff;border-color:var(--primary)}.button-primary:hover{background:var(--primary-hover);border-color:var(--primary-hover)}.button-primary:disabled{background:#e5e8f0;color:#526078;border-color:#cbd3e2}.button-primary:disabled:hover{background:#e5e8f0;color:#526078}.button-outline{background:var(--surface);border-color:#b8c2d4;color:#34435b}.button-outline:hover{background:#f0f2f9;border-color:#99a7bf}.button-outline:disabled{color:#526078;background:#f0f2f8;border-color:#cbd3e2}.keyboard-hint{display:none}.preview-label{height:58px;display:flex;align-items:center;margin:0 24px;padding:0 0 13px;border-bottom:1px solid #e0e5ef;color:var(--muted);font-size:13px;flex-shrink:0}.output-card textarea{display:block;width:100%;min-width:0;height:440px;min-height:180px;resize:vertical;outline:0;padding:22px 24px 30px;border:0;background:transparent;color:var(--ink);font-family:"Segoe UI","Segoe UI Emoji","Segoe UI Symbol","Cambria Math",Arial,sans-serif;font-size:16px;line-height:1.8;scrollbar-width:thin;scrollbar-color:#b5bfd2 transparent}.output-card textarea::placeholder{color:#626f84}.output-card textarea:focus-visible{box-shadow:inset 0 0 0 2px #8279df}.card-footer{height:52px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 24px;border-top:1px solid #e0e5ef;color:var(--muted);font-size:13px;flex-shrink:0}.options-panel{margin-top:18px;border:1px solid transparent;border-radius:12px;color:var(--muted)}.options-panel>summary{min-height:44px;display:inline-flex;align-items:center;gap:9px;font-size:14px;font-weight:500;list-style:none;padding:9px 3px;border-radius:6px}.options-panel>summary::-webkit-details-marker{display:none}.options-panel>summary svg{width:16px;height:16px}.options-panel[open]{background:var(--surface);border-color:var(--line);padding:0 20px 20px}.options-panel[open]>summary{min-height:54px;color:var(--ink)}.options-panel[open]>summary svg{transform:rotate(180deg)}.settings-grid{display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr;gap:18px}.setting{min-width:0;display:flex;flex-direction:column;gap:8px}.setting label,.setting-label{font-size:13px;color:#34435b;font-weight:500}.setting select{height:42px;max-width:100%;min-width:0;width:100%;border:1px solid #b8c2d4;border-radius:7px;padding:8px 10px;background:#fff;color:var(--ink);font-size:14px}.format-mode{display:flex;background:#eef0f7;border:1px solid #cbd3e2;border-radius:7px;padding:3px;gap:3px;height:42px}.mode-button{flex:1;font-size:13px;border:1px solid transparent;background:transparent;color:var(--muted);border-radius:4px;padding:5px 9px;white-space:nowrap}.mode-button.active{background:var(--primary);color:#fff;border-color:var(--primary)}.options-bottom{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:20px;font-size:13px}.paste-setting{display:inline-flex;align-items:center;gap:9px;color:#34435b;line-height:1.5;font-size:13px}.paste-setting input{width:16px;height:16px;accent-color:var(--primary);margin:0}.optional-actions{display:flex;flex-wrap:wrap;gap:10px;border-top:1px solid #e0e5ef;margin-top:20px;padding-top:18px}.optional-actions .button{font-size:13px;font-weight:500}.notice{min-height:34px;padding:10px 0 0;color:#34435b;font-size:14px;line-height:1.5}.notice.error{color:#9a321d}dialog{width:420px;max-width:calc(100vw - 32px);border:1px solid var(--line);border-radius:16px;background:#fff;padding:26px;color:var(--ink);box-shadow:0 20px 80px #17253e2b}dialog::backdrop{background:#17253e70}dialog h2{font-size:21px;font-weight:650;margin:0 0 22px}dialog label{display:block;font-size:14px;margin:15px 0 8px}dialog input{display:block;width:100%;height:44px;padding:11px;border:1px solid #b8c2d4;background:#fff;border-radius:7px;color:var(--ink);font-size:16px}.dialog-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:20px}.dialog-actions .text-button{margin-right:auto}#linkError{font-size:13px;color:#9a321d;margin:10px 0 0}#removeLink[hidden]{display:none}
+@media(min-height:950px) and (min-width:800px){.rich-editor,.output-card textarea{height:480px}}
+@media(max-width:1050px){.app{padding:0 28px 25px}.editors{gap:16px}.card-top{padding:0 20px}.editor-toolbar,.preview-label{margin:0 20px}.rich-editor,.output-card textarea{padding:20px}.card-footer{padding:0 20px}.settings-grid{grid-template-columns:1fr 1fr;gap:18px 22px}.button{font-size:13px;padding:10px 12px}.output-heading{gap:10px}.card-top h2{font-size:16px}}
+@media(max-width:750px){.app{padding:0 18px 20px}.masthead{height:76px}.brand{font-size:21px}.brand-mark{width:32px;height:33px;font-size:21px}.platform-label{font-size:13px}.page-heading{padding:14px 0 23px}.page-heading h1{font-size:27px}.page-heading p{font-size:14px}.editors{grid-template-columns:minmax(0,1fr);gap:18px}.card-top{height:68px;padding:0 19px}.card-top h2{font-size:17px}.editor-toolbar{height:56px;margin:0 19px}.rich-editor{height:320px;padding:20px 19px}.output-card textarea{height:340px;padding:20px 19px}.preview-label{height:42px;margin:0 19px;padding-bottom:10px}.card-footer{height:48px;padding:0 19px}.options-panel{margin-top:12px}.options-panel[open]{padding:0 16px 18px}.options-bottom{align-items:flex-start;flex-direction:column;gap:13px}.button{font-size:14px}.optional-actions .button{font-size:13px}.dialog-actions{gap:8px}.dialog-actions .button{padding:9px 12px}}
+@media(max-width:380px){.app{padding:0 14px 18px}.brand{font-size:20px;gap:8px}.platform-label{font-size:13px}.page-heading h1{font-size:26px}.card-top{padding:0 16px;gap:10px}.card-top h2{font-size:16px}.output-heading .button{font-size:13px;padding:9px 10px;gap:6px}.output-heading .button svg{width:17px;height:17px}.editor-toolbar,.preview-label{margin:0 16px}.rich-editor,.output-card textarea{padding:18px 16px}.card-footer{padding:0 16px;font-size:13px}.settings-grid{grid-template-columns:1fr}.format-button{width:38px}.toolbar-divider{margin:0 5px}.optional-actions{flex-direction:column;align-items:stretch}}
+/* Keep the writing surface spacious and secondary controls quiet. */
+.masthead{height:72px}
+.platform-label{font-size:13px;font-weight:600;color:#42367a;background:#e6e3f4;padding:7px 11px;border-radius:7px}
+.page-heading{padding:13px 0 25px}
+.editor-card{border-radius:17px;box-shadow:0 8px 26px #1c243808}
+.source-card:focus-within{border-color:var(--primary);box-shadow:0 0 0 2px #4934bd18}
+.format-button{width:44px;height:44px;gap:8px;border-radius:8px}
+.format-button:hover{background:#f0eef9;border-color:#cbd0df}
+.format-button[aria-pressed=true]{background:var(--accent-soft);color:#352083;border-color:#9f90d0}
+.clear-style-button{width:auto;padding:8px 10px}
+.clear-style-label{font-size:12px;font-weight:500;white-space:nowrap}
+.rich-editor,.output-card textarea{height:clamp(300px,calc(100dvh - 410px),560px);line-height:1.85}
+.rich-editor{font-family:"Segoe UI","Segoe UI Emoji",Arial,sans-serif}
+.rich-editor a{color:var(--primary)}
+.rich-editor.is-empty:before,.output-card textarea::placeholder{color:#5b687f}
+.output-card{background:#fdfcff}
+.button{min-height:44px;border-radius:9px}
+.button-outline,.setting select,.format-mode,dialog input{border-color:#78849c}
+.button-outline:hover{border-color:#5a6680;background:#f3f1fa}
+.notice{min-height:0;padding:0}
+.notice:not(:empty){padding-top:10px}
+@media(max-width:1050px){.clear-style-label{display:none}.clear-style-button{width:44px}}
+@media(max-width:750px){.masthead{height:66px}.platform-label{font-size:12px;padding:6px 8px}.page-heading{padding:12px 0 22px}.rich-editor{height:300px}.output-card textarea{height:320px}.format-button{width:44px;height:44px}}
+@media(max-width:380px){.output-heading h2{max-width:120px;line-height:1.35}.format-button{width:44px}.toolbar-divider{margin:0 4px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+  <div class="app">
+    <header class="masthead">
+      <a class="brand" href="#" aria-label="Postform home"><span class="brand-mark" aria-hidden="true">P</span>Postform</a>
+      <span class="platform-label">LinkedIn &amp; X</span>
+    </header>
+    <main>
+      <div class="page-heading"><h1>Format your post</h1><p>Edit on the left. Copy from the right.</p></div>
+      <section class="workspace" aria-label="Post formatter">
+        <div class="editors">
+          <section class="editor-card source-card" aria-labelledby="draftLabel">
+            <div class="card-top"><h2 id="draftLabel">Your draft</h2><button type="button" class="text-button" id="clearDraft" aria-label="Clear draft">Clear</button></div>
+            <div class="editor-toolbar" role="group" aria-label="Text formatting">
+              <button type="button" class="format-button" id="boldText" data-command="bold" title="Bold (Ctrl+B / ⌘B)" aria-label="Bold" aria-pressed="false"><strong>B</strong></button>
+              <button type="button" class="format-button" id="italicText" data-command="italic" title="Italic (Ctrl+I / ⌘I)" aria-label="Italic" aria-pressed="false"><em>I</em></button>
+              <span class="toolbar-divider" aria-hidden="true"></span>
+              <button type="button" class="format-button" id="bulletList" data-command="insertUnorderedList" title="Bullet list" aria-label="Bullet list" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 5h8M8 10h8M8 15h8M3 5h1M3 10h1M3 15h1"/></svg></button>
+              <button type="button" class="format-button" id="editLink" title="Add or edit link" aria-label="Add or edit link"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 12 4-4M7 13l-1 1a3 3 0 0 1-4-4l3-3a3 3 0 0 1 4 0m2 0 1-1a3 3 0 0 1 4 4l-3 3a3 3 0 0 1-4 0"/></svg></button>
+              <button type="button" class="format-button clear-style-button" id="clearFormat" data-command="removeFormat" title="Remove bold and italics" aria-label="Remove formatting"><span aria-hidden="true">T×</span><span class="clear-style-label">Clear style</span></button>
+            </div>
+            <div id="source" class="rich-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="draftLabel" aria-describedby="sourceHelp" spellcheck="true" data-placeholder="Paste your post or start writing…"></div>
+            <div class="card-footer"><span id="sourceHelp">Select text to format</span></div>
+          </section>
+          <section class="editor-card output-card" aria-labelledby="outputLabel">
+            <div class="card-top output-heading"><h2><label id="outputLabel" for="output">Your formatted post</label></h2><button class="button button-primary" id="copyPost" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="7" width="9" height="10" rx="2"/><path d="M12 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg><span id="copyLabel">Copy post</span><span class="keyboard-hint" aria-hidden="true">Ctrl ↵</span></button></div>
+            <p id="outputDescription" class="preview-label">Unicode preview</p>
+            <textarea id="output" readonly spellcheck="false" aria-describedby="outputDescription" placeholder="Your formatted post will appear here."></textarea>
+            <div class="card-footer"><span id="characterCount">0 characters</span><button type="button" class="text-button" id="selectOutput">Select all</button></div>
+          </section>
+        </div>
+        <details class="options-panel" id="optionsPanel">
+          <summary>Options<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4"/></svg></summary>
+          <div class="options-content">
+            <div class="settings-grid">
+              <div class="setting"><label for="spacing">Spacing</label><select id="spacing"><option value="social">Social spacing</option><option value="roomy">Extra space between list items</option><option value="preserve">Keep my line breaks</option></select></div>
+              <div class="setting"><label for="font">Bold style</label><select id="font"><option value="sans">𝗦𝗮𝗻𝘀 + 𝟏𝟐𝟑</option><option value="serif">𝐒𝐞𝐫𝐢𝐟 + 𝟏𝟐𝟑</option></select></div>
+              <div class="setting"><label for="linkStyle">Links</label><select id="linkStyle"><option value="inline">Label + URL</option><option value="newline">URL on a new line</option><option value="label">Label only</option></select></div>
+              <div class="setting"><span class="setting-label">Output</span><div class="format-mode" role="group" aria-label="Output mode"><button type="button" class="mode-button active" id="unicodeMode" aria-pressed="true">Unicode</button><button type="button" class="mode-button" id="plainMode" aria-pressed="false">Plain text</button></div></div>
+            </div>
+            <div class="options-bottom"><label class="paste-setting"><input id="richPaste" type="checkbox" checked> Keep pasted formatting</label><span id="saveStatus">Saved on this device</span></div>
+            <div class="optional-actions"><button type="button" class="button button-outline" id="loadExample">Try an example</button><button type="button" class="button button-outline" id="downloadText">Save post as .txt</button><button type="button" class="button button-outline" id="saveTool">Download app</button></div>
+          </div>
+        </details>
+        <div id="notice" class="notice" role="status" aria-live="polite"></div>
+      </section>
+    </main>
+  </div>
+  <dialog id="linkDialog" aria-labelledby="linkTitle"><form id="linkForm"><h2 id="linkTitle">Edit link</h2><label for="linkText">Text</label><input id="linkText" type="text" required autocomplete="off"><label for="linkUrl">URL</label><input id="linkUrl" type="text" required placeholder="https://example.com" autocomplete="off"><p id="linkError" role="alert"></p><div class="dialog-actions"><button type="button" class="text-button" id="removeLink">Remove link</button><button type="button" class="button button-outline" id="cancelLink">Cancel</button><button type="submit" class="button button-primary">Apply</button></div></form></dialog>
+  <script>(function (root, factory) {
+  'use strict';
+  var api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  if (root) root.PostFormatter = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  var STYLES = {
+    sans: {
+      bold: [0x1D5D4, 0x1D5EE],
+      italic: [0x1D608, 0x1D622],
+      both: [0x1D63C, 0x1D656]
+    },
+    serif: {
+      bold: [0x1D400, 0x1D41A],
+      italic: [0x1D434, 0x1D44E],
+      both: [0x1D468, 0x1D482]
+    }
+  };
+  var REVERSE = Object.create(null);
+  Object.keys(STYLES).forEach(function (font) {
+    Object.keys(STYLES[font]).forEach(function (style) {
+      var bases = STYLES[font][style];
+      for (var i = 0; i < 26; i++) {
+        REVERSE[String.fromCodePoint(bases[0] + i)] = String.fromCharCode(65 + i);
+        REVERSE[String.fromCodePoint(bases[1] + i)] = String.fromCharCode(97 + i);
+      }
+    });
+  });
+  delete REVERSE[String.fromCodePoint(0x1D455)]; // The serif italic h is a Unicode gap.
+  REVERSE['ℎ'] = 'h';
+  // Recognize the other mathematical digit alphabets when cleaning copied text.
+  [0x1D7CE, 0x1D7D8, 0x1D7E2, 0x1D7EC, 0x1D7F6].forEach(function (base) {
+    for (var i = 0; i < 10; i++) REVERSE[String.fromCodePoint(base + i)] = String(i);
+  });
+
+  function stripStyles(value) {
+    return Array.from(String(value == null ? '' : value), function (ch) {
+      return REVERSE[ch] || ch;
+    }).join('');
+  }
+
+  function mapLetters(value, style) {
+    if (!style.bold && !style.italic) return value;
+    var font = style.font === 'serif' ? 'serif' : 'sans';
+    var key = style.bold && style.italic ? 'both' : style.bold ? 'bold' : 'italic';
+    var bases = STYLES[font][key];
+    return Array.from(value, function (ch) {
+      var c = ch.codePointAt(0);
+      if (c >= 65 && c <= 90) return String.fromCodePoint(bases[0] + c - 65);
+      if (c >= 97 && c <= 122) {
+        if (font === 'serif' && key === 'italic' && ch === 'h') return 'ℎ';
+        return String.fromCodePoint(bases[1] + c - 97);
+      }
+      if (style.bold && c >= 48 && c <= 57) return String.fromCodePoint(0x1D7CE + c - 48);
+      return ch;
+    }).join('');
+  }
+
+  function isWord(ch) { return !!ch && /[\p{L}\p{M}\p{N}_]/u.test(ch); }
+  function isSpace(ch) { return !ch || /\s/u.test(ch); }
+  function isPunctuation(ch) { return !!ch && /[\p{P}\p{S}]/u.test(ch); }
+  function previousCharacter(text, pos) {
+    if (!pos) return '';
+    var code = text.charCodeAt(pos - 1);
+    return code >= 0xDC00 && code <= 0xDFFF && pos > 1 ? text.slice(pos - 2, pos) : text[pos - 1];
+  }
+  // Returning the UTF-16 end offset lets the parser keep punctuation outside URLs.
+  function protectedSpan(text, start) {
+    var rest = text.slice(start);
+    var before = previousCharacter(text, start);
+    var found;
+    if (text[start] === '[') {
+      found = /^\[(?:\d+|\^[^\]\s]+)\](?!\()/.exec(rest);
+      if (found) return start + found[0].length;
+    }
+    if ((!before || !isWord(before)) && /^(?:https?:\/\/|mailto:|www\.)/i.test(rest)) {
+      found = /^[^\s<>`]+/.exec(rest);
+      if (found) {
+        var url = found[0].replace(/[.,!?:;*_]+$/g, '');
+        [['(', ')'], ['[', ']'], ['{', '}']].forEach(function (pair) {
+          var opens = url.split(pair[0]).length - 1;
+          var closes = url.split(pair[1]).length - 1;
+          while (closes > opens && url.endsWith(pair[1])) {
+            url = url.slice(0, -1); closes--;
+          }
+        });
+        if (url) return start + url.length;
+      }
+    }
+    if (text[start] === '@' && (!before || (!isWord(before) && before !== '@'))) {
+      found = /^@[A-Za-z0-9_]+/.exec(rest);
+      if (found) return start + found[0].replace(/_+$/, '').length;
+    }
+    if (text[start] === '#' && (!before || !isWord(before))) {
+      found = /^#[\p{L}\p{N}_]+/u.exec(rest);
+      if (found) return start + found[0].replace(/_+$/, '').length;
+    }
+    // Email addresses also need their Latin characters intact when copied.
+    if ((!before || !isWord(before)) && /[A-Za-z0-9]/.test(text[start] || '')) {
+      found = /^[A-Za-z0-9.!#$%&'+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?\.[A-Za-z]{2,}/.exec(rest);
+      if (found) return start + found[0].length;
+    }
+    return start;
+  }
+
+  function stylize(value, style) {
+    var text = String(value == null ? '' : value);
+    style = style || {};
+    var out = '', plain = '';
+    for (var i = 0; i < text.length;) {
+      var end = protectedSpan(text, i);
+      if (end > i) {
+        out += mapLetters(plain, style) + text.slice(i, end);
+        plain = ''; i = end;
+      } else {
+        var ch = String.fromCodePoint(text.codePointAt(i));
+        plain += ch; i += ch.length;
+      }
+    }
+    return out + mapLetters(plain, style);
+  }
+
+  function findClosingBracket(text, start, open, close) {
+    var nesting = 1;
+    for (var i = start + 1; i < text.length; i++) {
+      if (text[i] === '\\') { i++; continue; }
+      if (text[i] === open) nesting++;
+      else if (text[i] === close && --nesting === 0) return i;
+    }
+    return -1;
+  }
+
+  function destination(raw) {
+    raw = raw.trim();
+    var m = /^<([^<>]*)>(?:\s+["'][\s\S]*["'])?$/.exec(raw);
+    if (m) raw = m[1];
+    else {
+      // Markdown titles follow whitespace; parentheses inside URLs remain intact.
+      var title = /\s+["'][\s\S]*["']\s*$/.exec(raw);
+      if (title) raw = raw.slice(0, title.index);
+    }
+    return raw.replace(/\\([!"#$%&'()*+,\-./:;<=>?@[\]\\^_`{|}~])/g, '$1');
+  }
+
+  function addText(tokens, value, literal) {
+    if (!value) return;
+    var last = tokens[tokens.length - 1];
+    if (last && last.type === 'text' && !!last.literal === !!literal) last.text += value;
+    else tokens.push({ type: 'text', text: value, literal: !!literal });
+  }
+
+  function parseInline(text, options, depth) {
+    if (depth > 24) return [{ text: text, literal: true }];
+    var tokens = [];
+    for (var i = 0; i < text.length;) {
+      var ch = text[i];
+      if (ch === '\\' && /[!"#$%&'()*+,\-./:;<=>?@[\]\\^_`{|}~]/.test(text[i + 1] || '')) {
+        addText(tokens, text[i + 1], true); i += 2; continue;
+      }
+      if (ch === '`') {
+        var tickEnd = i;
+        while (text[tickEnd] === '`') tickEnd++;
+        var ticks = text.slice(i, tickEnd), match = text.indexOf(ticks, tickEnd);
+        while (match >= 0 && (text[match - 1] === '`' || text[match + ticks.length] === '`')) {
+          match = text.indexOf(ticks, match + ticks.length);
+        }
+        if (match >= 0) {
+          var code = text.slice(tickEnd, match).replace(/\n/g, ' ');
+          if (/^ .* $/.test(code) && /[^ ]/.test(code)) code = code.slice(1, -1);
+          tokens.push({ type: 'text', text: code, literal: true, code: true }); i = match + ticks.length; continue;
+        }
+        addText(tokens, ticks, true); i = tickEnd; continue;
+      }
+      var image = ch === '!' && text[i + 1] === '[';
+      if (ch === '[' || image) {
+        var labelStart = image ? i + 1 : i;
+        var labelEnd = findClosingBracket(text, labelStart, '[', ']');
+        if (labelEnd >= 0 && text[labelEnd + 1] === '(') {
+          var urlEnd = findClosingBracket(text, labelEnd + 1, '(', ')');
+          if (urlEnd >= 0) {
+            var label = text.slice(labelStart + 1, labelEnd);
+            var url = destination(text.slice(labelEnd + 2, urlEnd));
+            var children = parseInline(label, options, depth + 1);
+            var readableLabel = children.map(function (part) { return part.text; }).join('');
+            var suffix = '';
+            if (url && options.linkStyle !== 'label') {
+              if (!readableLabel.trim() || stripStyles(readableLabel.trim()) === url) {
+                children = [{ text: url, literal: true }];
+              } else suffix = options.linkStyle === 'newline' ? '\n' + url : ' (' + url + ')';
+            }
+            tokens.push({ type: 'node', children: children, suffix: suffix, href: url });
+            i = urlEnd + 1; continue;
+          }
+        }
+      }
+      if (ch === '<') {
+        var auto = /^<((?:https?:\/\/|mailto:)[^<>\s]+)>/i.exec(text.slice(i));
+        if (auto) { addText(tokens, auto[1], true); i += auto[0].length; continue; }
+      }
+      var protectedEnd = protectedSpan(text, i);
+      if (protectedEnd > i) {
+        addText(tokens, text.slice(i, protectedEnd), true); i = protectedEnd; continue;
+      }
+      if (ch === '*' || ch === '_') {
+        var runEnd = i + 1;
+        while (text[runEnd] === ch) runEnd++;
+        var before = previousCharacter(text, i);
+        var after = runEnd < text.length ? String.fromCodePoint(text.codePointAt(runEnd)) : '';
+        var left = !isSpace(after) && (!isPunctuation(after) || isSpace(before) || isPunctuation(before));
+        var right = !isSpace(before) && (!isPunctuation(before) || isSpace(after) || isPunctuation(after));
+        tokens.push({ type: 'delimiter', char: ch, length: runEnd - i, remaining: runEnd - i,
+          canOpen: ch === '_' ? left && (!right || isPunctuation(before)) : left,
+          canClose: ch === '_' ? right && (!left || isPunctuation(after)) : right,
+          openBold: 0, closeBold: 0, openItalic: 0, closeItalic: 0 });
+        i = runEnd; continue;
+      }
+      var char = String.fromCodePoint(text.codePointAt(i));
+      addText(tokens, char, false); i += char.length;
+    }
+
+    var stack = [];
+    tokens.forEach(function (token, index) {
+      if (token.type !== 'delimiter') return;
+      if (token.canClose) {
+        while (token.remaining > 0) {
+          var found = -1;
+          for (var s = stack.length - 1; s >= 0; s--) {
+            var candidate = tokens[stack[s]];
+            if (candidate.char !== token.char || !candidate.remaining) continue;
+            if ((candidate.canClose || token.canOpen) && (candidate.remaining + token.remaining) % 3 === 0 &&
+                (candidate.remaining % 3 !== 0 || token.remaining % 3 !== 0)) continue;
+            found = s; break;
+          }
+          if (found < 0) break;
+          var opener = tokens[stack[found]];
+          var use = opener.remaining >= 2 && token.remaining >= 2 ? 2 : 1;
+          opener.remaining -= use; token.remaining -= use;
+          if (use === 2) { opener.openBold++; token.closeBold++; }
+          else { opener.openItalic++; token.closeItalic++; }
+          // Unmatched delimiters inside a matched span cannot cross its boundary.
+          stack.splice(found + 1);
+          if (!opener.remaining) stack.splice(found, 1);
+        }
+      }
+      if (token.canOpen && token.remaining) stack.push(index);
+    });
+
+    var result = [], bold = 0, italic = 0;
+    function emit(part) {
+      result.push({ text: part.text, literal: !!part.literal, code: !!part.code, href: part.href,
+        bold: bold > 0 || !!part.bold, italic: italic > 0 || !!part.italic });
+    }
+    tokens.forEach(function (token) {
+      if (token.type === 'delimiter') {
+        bold -= token.closeBold; italic -= token.closeItalic;
+        if (token.remaining) emit({ text: token.char.repeat(token.remaining) });
+        bold += token.openBold; italic += token.openItalic;
+      } else if (token.type === 'node') {
+        token.children.forEach(function (child) { emit(Object.assign({}, child, { href: token.href || child.href })); });
+        if (token.suffix) emit({ text: token.suffix, literal: true });
+      } else emit(token);
+    });
+    return result;
+  }
+
+  function inline(text, options, bold) {
+    return parseInline(text, options, 0).map(function (part) {
+      if (part.literal || options.plain) return options.plain ? stripStyles(part.text) : part.text;
+      return stylize(part.text, {
+        font: options.font, bold: options.bold !== false && (!!bold || part.bold),
+        italic: options.italic !== false && part.italic
+      });
+    }).join('');
+  }
+
+  function normalizeOptions(options) {
+    options = options || {};
+    return {
+      spacing: ['preserve', 'social', 'roomy'].indexOf(options.spacing) >= 0 ? options.spacing : 'social',
+      linkStyle: ['inline', 'newline', 'label'].indexOf(options.linkStyle) >= 0 ? options.linkStyle : 'inline',
+      font: options.font === 'serif' ? 'serif' : 'sans',
+      plain: !!options.plain, bold: options.bold !== false, italic: options.italic !== false
+    };
+  }
+
+  function format(value, settings) {
+    var options = normalizeOptions(settings);
+    var input = String(value == null ? '' : value).replace(/\r\n?/g, '\n');
+    var lines = input.split('\n'), rows = [], fence = null, codeGroup = 0;
+    for (var n = 0; n < lines.length; n++) {
+      var line = lines[n];
+      if (fence) {
+        var close = /^ {0,3}(`{3,}|~{3,})\s*$/.exec(line);
+        if (close && close[1][0] === fence.char && close[1].length >= fence.length) {
+          fence = null; continue;
+        }
+        rows.push({ text: line, kind: 'code', group: codeGroup }); continue;
+      }
+      var opening = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(line);
+      if (opening && (opening[1][0] !== '`' || opening[2].indexOf('`') < 0)) {
+        fence = { char: opening[1][0], length: opening[1].length }; codeGroup++; continue;
+      }
+      if (!line.trim()) { rows.push({ text: '', kind: 'blank' }); continue; }
+      var heading = /^ {0,3}#{1,6}(?:[ \t]+|$)(.*)$/.exec(line);
+      if (heading) {
+        var title = heading[1].replace(/[ \t]+#+[ \t]*$/, '').trim();
+        rows.push({ text: inline(title, options, true), kind: 'heading' }); continue;
+      }
+      if (n + 1 < lines.length && /^ {0,3}(?:={3,}|-{3,})\s*$/.test(lines[n + 1]) && !/^\s*[-*+]\s/.test(line)) {
+        rows.push({ text: inline(line.trim(), options, true), kind: 'heading' }); n++; continue;
+      }
+      if (/^ {0,3}(?:(?:\*\s*){3,}|(?:-\s*){3,}|(?:_\s*){3,})$/.test(line)) {
+        rows.push({ text: '', kind: 'blank' }); continue;
+      }
+      var bullet = /^(\s*)[-*+][ \t]+(.*)$/.exec(line);
+      if (bullet) {
+        rows.push({ text: bullet[1] + '• ' + inline(bullet[2], options), kind: 'list' }); continue;
+      }
+      var ordered = /^(\s*)(\d{1,9}[.)])[ \t]+(.*)$/.exec(line);
+      if (ordered) {
+        rows.push({ text: ordered[1] + ordered[2] + ' ' + inline(ordered[3], options), kind: 'list' }); continue;
+      }
+      var previous = rows[rows.length - 1];
+      if (/^ {2,}\S/.test(line) && previous && previous.kind === 'list' && options.spacing !== 'preserve') {
+        previous.text += ' ' + inline(line.trim(), options); continue;
+      }
+      var quote = /^ {0,3}(?:>[ \t]?)+/.exec(line);
+      if (quote) line = line.slice(quote[0].length);
+      var kind = /^\[\d+\](?::|\s)/.test(line) ? 'footnote' : 'paragraph';
+      rows.push({ text: inline(line, options), kind: kind });
+    }
+    if (options.spacing === 'preserve') return rows.map(function (row) { return row.text; }).join('\n');
+
+    var output = '', prev = null, blank = false;
+    rows.forEach(function (row) {
+      if (row.kind === 'blank') { blank = true; return; }
+      var separator = '';
+      if (prev) {
+        if (row.kind === 'code' && prev.kind === 'code' && row.group === prev.group) separator = '\n';
+        else if (blank) separator = '\n\n';
+        else if (row.kind === 'list' && prev.kind === 'list') separator = options.spacing === 'roomy' ? '\n\n' : '\n';
+        else if (row.kind === 'list' && (prev.kind === 'heading' || /:\s*$/.test(prev.text))) separator = '\n';
+        else separator = '\n\n';
+      }
+      output += separator + row.text; prev = row; blank = false;
+    });
+    return output;
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, function (ch) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+  }
+
+  // Reuse the emphasis parser for the visual editor; imported HTML is escaped
+  // here rather than trusting markup supplied by the clipboard or local storage.
+  function toEditorHtml(value) {
+    var options = normalizeOptions({ linkStyle: 'label' });
+    function richLine(line, heading) {
+      var result = '', link = '', linkContent = '';
+      function flushLink() {
+        if (link) { result += '<a href="' + escapeHtml(link) + '">' + linkContent + '</a>'; link = ''; linkContent = ''; }
+      }
+      parseInline(line, options, 0).forEach(function (part) {
+        var html = escapeHtml(part.text);
+        if (part.code) html = '<code>' + html + '</code>';
+        else {
+          if (part.italic) html = '<em>' + html + '</em>';
+          if (part.bold || heading) html = '<strong>' + html + '</strong>';
+        }
+        var href = part.href && /^(?:https?:\/\/|mailto:)/i.test(part.href) ? part.href : '';
+        if (href !== link) flushLink();
+        if (href) { link = href; linkContent += html; }
+        else result += html;
+      });
+      flushLink(); return result;
+    }
+    var lines = String(value == null ? '' : value).replace(/\r\n?/g, '\n').split('\n');
+    var output = [], paragraph = [], list = null, fence = null, code = [];
+    function flushParagraph() {
+      if (paragraph.length) { output.push('<p>' + paragraph.join('<br>') + '</p>'); paragraph = []; }
+    }
+    function closeList() { if (list) { output.push('</' + list + '>'); list = null; } }
+    for (var n = 0; n < lines.length; n++) {
+      var line = lines[n], match;
+      if (fence) {
+        match = /^ {0,3}(`{3,}|~{3,})\s*$/.exec(line);
+        if (match && match[1][0] === fence[0] && match[1].length >= fence.length) {
+          output.push('<pre>' + escapeHtml(code.join('\n')) + '</pre>'); fence = null; code = [];
+        } else code.push(line);
+        continue;
+      }
+      match = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(line);
+      if (match && (match[1][0] !== '`' || match[2].indexOf('`') < 0)) {
+        flushParagraph(); closeList(); fence = match[1]; continue;
+      }
+      if (!line.trim()) { flushParagraph(); closeList(); continue; }
+      match = /^ {0,3}#{1,6}(?:[ \t]+|$)(.*)$/.exec(line);
+      if (match) {
+        flushParagraph(); closeList(); output.push('<p>' + richLine(match[1].replace(/[ \t]+#+[ \t]*$/, '').trim(), true) + '</p>'); continue;
+      }
+      if (n + 1 < lines.length && /^ {0,3}(?:={3,}|-{3,})\s*$/.test(lines[n + 1]) && !/^\s*[-*+]\s/.test(line)) {
+        flushParagraph(); closeList(); output.push('<p>' + richLine(line.trim(), true) + '</p>'); n++; continue;
+      }
+      if (/^ {0,3}(?:(?:\*\s*){3,}|(?:-\s*){3,}|(?:_\s*){3,})$/.test(line)) { flushParagraph(); closeList(); continue; }
+      var bullet = /^\s*[-*+][ \t]+(.*)$/.exec(line);
+      var ordered = /^\s*(\d{1,9})[.)][ \t]+(.*)$/.exec(line);
+      if (bullet || ordered) {
+        flushParagraph(); var type = ordered ? 'ol' : 'ul';
+        if (list !== type) { closeList(); output.push(ordered ? '<ol start="' + Number(ordered[1]) + '">' : '<ul>'); list = type; }
+        output.push('<li' + (ordered ? ' value="' + Number(ordered[1]) + '"' : '') + '>' + richLine(ordered ? ordered[2] : bullet[1]) + '</li>'); continue;
+      }
+      closeList(); line = line.replace(/^ {0,3}(?:>[ \t]?)+/, ''); paragraph.push(richLine(line));
+    }
+    if (fence) output.push('<pre>' + escapeHtml(code.join('\n')) + '</pre>');
+    flushParagraph(); closeList();
+    return output.join('');
+  }
+
+  return Object.freeze({ format: format, stylize: stylize, stripStyles: stripStyles, toEditorHtml: toEditorHtml,
+    countCodePoints: function (value) { return Array.from(String(value == null ? '' : value)).length; } });
+});
+</script>
+  <script>(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const source = $('source');
+  const output = $('output');
+  const storageKey = 'postform.draft.v2';
+  const example = `A small update with **35 big possibilities**.
+
+Keep your **bold text and numbers**, add a little *emphasis*, and give each idea some room.
+
+- Write something useful.
+- Make it easy to read.
+- Share it with your people.`;
+  let plain = false;
+  let saveTimer;
+  let noticeTimer;
+  let copyTimer;
+  let revision = 0;
+  let editorRange = null;
+  let savedDraft = null;
+  try { savedDraft = JSON.parse(localStorage.getItem(storageKey) || localStorage.getItem('postform.draft.v1')); } catch (_) { /* Storage can be unavailable for local files. */ }
+  if (savedDraft && (typeof savedDraft.text === 'string' || typeof savedDraft.html === 'string')) {
+    // Rebuild saved HTML through the safe renderer before placing it in the editor.
+    source.innerHTML = PostFormatter.toEditorHtml(typeof savedDraft.html === 'string' ? richTextToMarkdown(savedDraft.html).markdown : savedDraft.text);
+    for (const key of ['spacing', 'font', 'linkStyle']) {
+      if (Array.from($(key).options).some(option => option.value === savedDraft[key])) $(key).value = savedDraft[key];
+    }
+    plain = savedDraft.plain === true;
+    $('richPaste').checked = savedDraft.richPaste !== false;
+  } else source.innerHTML = '';
+
+  function draftMarkdown() { return richTextToMarkdown(source.innerHTML).markdown; }
+  function snapshot() { return { version: 2, html: source.innerHTML, text: draftMarkdown(), ...options(), richPaste: $('richPaste').checked }; }
+
+  function options() {
+    return { spacing: $('spacing').value, font: $('font').value, linkStyle: $('linkStyle').value, plain };
+  }
+  function notice(message, isError = false, persistent = false) {
+    clearTimeout(noticeTimer);
+    $('notice').textContent = message;
+    $('notice').classList.toggle('error', isError);
+    if (!persistent) noticeTimer = setTimeout(() => { $('notice').textContent = ''; }, 6500);
+  }
+  function save() {
+    clearTimeout(saveTimer);
+    $('saveStatus').textContent = 'Saving…';
+    saveTimer = setTimeout(() => {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(snapshot()));
+        $('saveStatus').textContent = 'Saved on this device';
+      } catch (_) { $('saveStatus').textContent = 'Draft kept in this tab'; }
+    }, 250);
+  }
+  function render(persist = true) {
+    revision++;
+    if (persist) { clearTimeout(noticeTimer); $('notice').textContent = ''; }
+    clearTimeout(copyTimer);
+    $('copyLabel').textContent = 'Copy post';
+    output.value = PostFormatter.format(draftMarkdown(), options());
+    source.classList.toggle('is-empty', !source.textContent.trim());
+    const count = PostFormatter.countCodePoints(output.value);
+    $('characterCount').textContent = count.toLocaleString() + ' character' + (count === 1 ? '' : 's');
+    $('copyPost').disabled = !output.value.trim();
+    $('downloadText').disabled = !output.value.trim();
+    $('selectOutput').disabled = !output.value;
+    $('unicodeMode').classList.toggle('active', !plain);
+    $('plainMode').classList.toggle('active', plain);
+    $('unicodeMode').setAttribute('aria-pressed', String(!plain));
+    $('plainMode').setAttribute('aria-pressed', String(plain));
+    $('font').disabled = plain;
+    $('outputDescription').textContent = plain ? 'Plain text preview' : 'Unicode preview';
+    updateToolbar();
+    if (persist) save();
+  }
+  source.addEventListener('input', () => render());
+  for (const key of ['spacing', 'font', 'linkStyle']) $(key).addEventListener('change', () => {
+    render();
+    if (key === 'linkStyle' && $('linkStyle').value === 'label') notice('Label only: link destinations are left out of the post.');
+  });
+  $('richPaste').addEventListener('change', save);
+  $('unicodeMode').addEventListener('click', () => { plain = false; render(); });
+  $('plainMode').addEventListener('click', () => { plain = true; render(); });
+  // Preserve the native undo stack for paste, formatting, and replacing a draft.
+  function rememberSelection() {
+    const selection = window.getSelection();
+    if (selection.rangeCount && source.contains(selection.anchorNode) && source.contains(selection.focusNode)) editorRange = selection.getRangeAt(0).cloneRange();
+  }
+  function restoreSelection() {
+    source.focus();
+    const selection = window.getSelection();
+    if (editorRange && source.contains(editorRange.commonAncestorContainer)) {
+      selection.removeAllRanges(); selection.addRange(editorRange);
+    } else {
+      const range = document.createRange(); range.selectNodeContents(source); range.collapse(false);
+      selection.removeAllRanges(); selection.addRange(range);
+    }
+  }
+  function insertEditorHtml(html) {
+    restoreSelection();
+    const selection = window.getSelection();
+    const selected = selection.rangeCount ? selection.getRangeAt(0) : null;
+    if (selected && !selected.collapsed && selected.toString() === source.textContent) {
+      // Browsers retain the old list around insertHTML when every item is
+      // selected. Delete that selection first and leave the list before pasting.
+      document.execCommand('delete', false, null);
+      for (const command of ['insertUnorderedList', 'insertOrderedList', 'bold', 'italic']) {
+        if (document.queryCommandState(command)) document.execCommand(command, false, null);
+      }
+    }
+    let applied = false;
+    try { applied = document.execCommand('insertHTML', false, html); } catch (_) { /* Range fallback below. */ }
+    if (!applied) {
+      const selection = window.getSelection();
+      const range = selection.getRangeAt(0); range.deleteContents();
+      const fragment = range.createContextualFragment(html);
+      const last = fragment.lastChild;
+      range.insertNode(fragment);
+      if (last) { range.setStartAfter(last); range.collapse(true); selection.removeAllRanges(); selection.addRange(range); }
+    }
+    rememberSelection(); render();
+  }
+  function replaceDraft(text) {
+    const range = document.createRange(); range.selectNodeContents(source); editorRange = range;
+    insertEditorHtml(PostFormatter.toEditorHtml(text));
+    if (!text) { source.innerHTML = ''; editorRange = null; render(); }
+  }
+  $('clearDraft').addEventListener('click', () => { replaceDraft(''); notice('Draft cleared.'); });
+  $('loadExample').addEventListener('click', () => { replaceDraft(example); });
+  $('selectOutput').addEventListener('click', () => { output.focus(); output.select(); });
+
+  function updateToolbar() {
+    const selection = window.getSelection();
+    const inside = selection.rangeCount && source.contains(selection.anchorNode);
+    for (const [id, command] of [['boldText', 'bold'], ['italicText', 'italic'], ['bulletList', 'insertUnorderedList']]) {
+      let active = false;
+      try { active = !!inside && document.queryCommandState(command); } catch (_) { /* Browser may not report state. */ }
+      $(id).setAttribute('aria-pressed', String(active));
+    }
+  }
+  document.addEventListener('selectionchange', () => { rememberSelection(); updateToolbar(); });
+  for (const button of document.querySelectorAll('.format-button')) {
+    button.addEventListener('mousedown', event => event.preventDefault());
+    if (button.dataset.command) button.addEventListener('click', () => {
+      restoreSelection(); document.execCommand(button.dataset.command, false, null); rememberSelection(); render();
+    });
+  }
+  source.addEventListener('keydown', event => {
+    if ((event.ctrlKey || event.metaKey) && ['b', 'i'].includes(event.key.toLowerCase())) {
+      event.preventDefault(); document.execCommand(event.key.toLowerCase() === 'b' ? 'bold' : 'italic', false, null); rememberSelection(); render();
+    }
+  });
+  const linkDialog = $('linkDialog');
+  function openLinkDialog(anchor) {
+    rememberSelection();
+    if (anchor) {
+      const range = document.createRange(); range.selectNodeContents(anchor); editorRange = range;
+    }
+    const selected = editorRange ? editorRange.toString() : '';
+    $('linkText').value = selected;
+    $('linkUrl').value = anchor?.getAttribute('href') || '';
+    $('removeLink').hidden = !anchor;
+    $('linkError').textContent = '';
+    linkDialog.showModal();
+    (selected ? $('linkUrl') : $('linkText')).focus();
+  }
+  $('editLink').addEventListener('click', () => {
+    const node = editorRange?.startContainer;
+    openLinkDialog((node?.nodeType === Node.ELEMENT_NODE ? node : node?.parentElement)?.closest('a'));
+  });
+  source.addEventListener('click', event => {
+    const anchor = event.target.closest('a');
+    if (anchor) { event.preventDefault(); openLinkDialog(anchor); }
+  });
+  $('cancelLink').addEventListener('click', () => { linkDialog.close(); restoreSelection(); });
+  $('removeLink').addEventListener('click', () => {
+    linkDialog.close(); restoreSelection(); document.execCommand('unlink', false, null); rememberSelection(); render();
+  });
+  $('linkForm').addEventListener('submit', event => {
+    event.preventDefault();
+    let url = $('linkUrl').value.trim();
+    if (!/^[a-z][a-z\d+.-]*:/i.test(url)) url = 'https://' + url;
+    if (!/^(https?:\/\/|mailto:)/i.test(url)) { $('linkError').textContent = 'Use an https://, http://, or mailto: link.'; return; }
+    try { const parsed = new URL(url); if (parsed.protocol !== 'mailto:' && !parsed.hostname) throw new Error(); } catch (_) { $('linkError').textContent = 'Enter a valid URL.'; return; }
+    const label = $('linkText').value;
+    linkDialog.close(); restoreSelection();
+    if (editorRange && !editorRange.collapsed && editorRange.toString() === label) {
+      document.execCommand('createLink', false, url); rememberSelection(); render();
+    } else {
+      const anchor = document.createElement('a'); anchor.setAttribute('href', url); anchor.textContent = label;
+      insertEditorHtml(anchor.outerHTML);
+    }
+  });
+
+  async function copyPost() {
+    if (!output.value.trim()) return;
+    const copiedRevision = revision;
+    const text = output.value;
+    let copied = false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); copied = true; }
+    } catch (_) { /* A file:// browser may need the selection fallback. */ }
+    if (!copied) {
+      // Never silently copy a newer render while an earlier clipboard request was pending.
+      const fallback = document.createElement('textarea');
+      fallback.value = text; fallback.setAttribute('aria-label', 'Post to copy');
+      fallback.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;';
+      document.body.appendChild(fallback); fallback.focus(); fallback.select();
+      try { copied = document.execCommand('copy'); } catch (_) { /* Select visible output below. */ }
+      fallback.remove();
+    }
+    if (copied) {
+      if (revision === copiedRevision) $('copyLabel').textContent = 'Copied!';
+      notice('Copied. Paste the whole post into LinkedIn or X.');
+      clearTimeout(copyTimer);
+      copyTimer = setTimeout(() => { $('copyLabel').textContent = 'Copy post'; }, 2400);
+      $('copyPost').focus();
+    } else {
+      output.focus(); output.select();
+      notice('Your browser blocked clipboard access. The post is selected — press Ctrl+C (⌘C on Mac).', true, true);
+    }
+  }
+  $('copyPost').addEventListener('click', copyPost);
+  document.addEventListener('keydown', (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') { event.preventDefault(); copyPost(); }
+  });
+  if (/Mac|iPhone|iPad/.test(navigator.platform)) document.querySelector('.keyboard-hint').textContent = '⌘ ↵';
+
+  function download(data, filename, type) {
+    const blob = new Blob([data], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+  }
+  $('downloadText').addEventListener('click', () => download(output.value, 'formatted-post.txt', 'text/plain;charset=utf-8'));
+  $('saveTool').addEventListener('click', () => {
+    // Build a fresh copy from the document without carrying the current draft or saved state.
+    const clean = document.documentElement.cloneNode(true);
+    clean.querySelector('#source').textContent = '';
+    clean.querySelector('#output').textContent = '';
+    clean.querySelector('#notice').textContent = '';
+    for (const select of clean.querySelectorAll('select')) for (const option of select.options) option.removeAttribute('selected');
+    download('<!doctype html>\n' + clean.outerHTML, 'Postform.html', 'text/html;charset=utf-8');
+    notice('App downloaded. Open Postform.html to use it offline.');
+  });
+
+  function richTextToMarkdown(html) {
+    // Inert template: pasted markup is never added to the live document or executed.
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    const root = template.content;
+    let meaningful = false;
+    const ignored = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'OBJECT', 'SVG', 'HEAD', 'META', 'LINK']);
+    const escapeMarkdown = text => text.replace(/([\\`*_\[\]])/g, '\\$1');
+    const raw = text => ({ text, raw: true });
+    function trimFragments(fragments) {
+      const result = fragments.map(part => ({ ...part }));
+      while (result.length && !result[0].text.trimStart()) result.shift();
+      while (result.length && !result[result.length - 1].text.trimEnd()) result.pop();
+      if (result.length) {
+        result[0].text = result[0].text.trimStart();
+        result[result.length - 1].text = result[result.length - 1].text.trimEnd();
+      }
+      return result;
+    }
+    function codeDelimiter(text, minimum = 1) {
+      const longest = Math.max(0, ...Array.from(text.matchAll(/`+/g), match => match[0].length));
+      return '`'.repeat(Math.max(minimum, longest + 1));
+    }
+    function walk(node, context = {}) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        if (context.bold || context.italic) meaningful = true;
+        return [{ text: escapeMarkdown(node.nodeValue.replace(/\u00a0/g, ' ')), bold: !!context.bold, italic: !!context.italic }];
+      }
+      if (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) return [];
+      const tag = node.tagName;
+      if (ignored.has(tag) || node.hasAttribute?.('hidden')) return [];
+      if (tag === 'BR') return [raw('\n')];
+      if (tag === 'IMG') return [{ text: escapeMarkdown(node.getAttribute('alt') || ''), bold: !!context.bold, italic: !!context.italic }];
+      if (tag === 'PRE') {
+        meaningful = true;
+        const text = node.textContent.replace(/\n$/, '');
+        const fence = codeDelimiter(text, 3);
+        return [raw('\n\n' + fence + '\n' + text + '\n' + fence + '\n\n')];
+      }
+      if (tag === 'CODE') {
+        meaningful = true;
+        const text = node.textContent;
+        const marker = codeDelimiter(text);
+        const padding = /^`|`$/.test(text) || (/^ .* $/.test(text) && /[^ ]/.test(text)) ? ' ' : '';
+        return [raw(marker + padding + text + padding + marker)];
+      }
+      const style = node.getAttribute?.('style') || '';
+      const weight = /(?:^|;)\s*font-weight\s*:\s*(bold(?:er)?|[6-9]00)\b/i.test(style);
+      const normalWeight = /(?:^|;)\s*font-weight\s*:\s*(normal|[1-5]00)\b/i.test(style);
+      const normalItalic = /(?:^|;)\s*font-style\s*:\s*normal\b/i.test(style);
+      // Google Docs wraps clipboard HTML in <b style="font-weight: normal">.
+      const isBold = (!normalWeight && (tag === 'B' || tag === 'STRONG' || /^H[1-6]$/.test(tag || ''))) || weight;
+      const isItalic = (!normalItalic && (tag === 'I' || tag === 'EM')) || /(?:^|;)\s*font-style\s*:\s*(italic|oblique)\b/i.test(style);
+      const nextContext = {
+        bold: normalWeight ? false : isBold || !!context.bold,
+        italic: normalItalic ? false : isItalic || !!context.italic
+      };
+      let value = Array.from(node.childNodes).flatMap(child => walk(child, nextContext));
+      if (tag === 'A') {
+        const href = node.getAttribute('href') || '';
+        if (/^(https?:\/\/|mailto:)/i.test(href)) {
+          meaningful = true;
+          value = [raw('['), ...trimFragments(value), raw('](' + href.replace(/\s/g, char => encodeURIComponent(char)) + ')')];
+        }
+      }
+      if (tag === 'LI') {
+        const parent = node.parentElement;
+        let marker = '- ';
+        if (parent?.tagName === 'OL') {
+          const siblings = Array.from(parent.children).filter(child => child.tagName === 'LI');
+          const start = Number.parseInt(parent.getAttribute('start') || '1', 10);
+          const explicit = Number.parseInt(node.getAttribute('value'), 10);
+          marker = (Number.isFinite(explicit) ? explicit : (Number.isFinite(start) ? start : 1) + siblings.indexOf(node)) + '. ';
+        }
+        meaningful = true;
+        return [raw(marker), ...trimFragments(value), raw('\n')];
+      }
+      if (tag === 'UL' || tag === 'OL') return [raw('\n\n'), ...trimFragments(value), raw('\n\n')];
+      if (['P', 'DIV', 'SECTION', 'ARTICLE', 'BLOCKQUOTE'].includes(tag) || /^H[1-6]$/.test(tag || '')) return [raw('\n\n'), ...trimFragments(value), raw('\n\n')];
+      return value;
+    }
+    // Keep shared styles open across adjacent text nodes, and close them before
+    // whitespace boundaries or raw Markdown. This preserves child style resets
+    // and prevents emphasis delimiters from straddling separate source lines.
+    const fragments = [];
+    for (const part of walk(root)) {
+      const previous = fragments[fragments.length - 1];
+      if (previous && !part.raw && !previous.raw && part.bold === previous.bold && part.italic === previous.italic) previous.text += part.text;
+      else fragments.push({ ...part });
+    }
+    let markdown = '';
+    const active = [];
+    const marker = style => style === 'bold' ? '**' : '*';
+    function transition(desired) {
+      let keep = 0;
+      while (keep < active.length && desired[active[keep]]) keep++;
+      while (active.length > keep) markdown += marker(active.pop());
+      for (const style of desired.styleOrder || ['bold', 'italic']) if (desired[style] && !active.includes(style)) {
+        active.push(style); markdown += marker(style);
+      }
+    }
+    for (const [fragmentIndex, part] of fragments.entries()) {
+      if (part.raw) { transition({}); markdown += part.text; continue; }
+      if (part.bold && part.italic) {
+        // When both styles begin together, keep the next surviving style outside
+        // so a child reset can close only the inner delimiter.
+        for (let next = fragmentIndex + 1; next < fragments.length; next++) {
+          const upcoming = fragments[next];
+          if (upcoming.raw || (!upcoming.bold && !upcoming.italic)) break;
+          if (upcoming.bold !== upcoming.italic) {
+            part.styleOrder = upcoming.italic ? ['italic', 'bold'] : ['bold', 'italic'];
+            break;
+          }
+        }
+      }
+      const lines = part.text.split('\n');
+      lines.forEach((line, index) => {
+        if (index) { transition({}); markdown += '\n'; }
+        const [, before, center, after] = /^(\s*)([\s\S]*?)(\s*)$/.exec(line);
+        if (before) { transition({}); markdown += before; }
+        if (center) { transition(part); markdown += center; }
+        if (after) { transition({}); markdown += after; }
+      });
+    }
+    transition({});
+    markdown = markdown.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    return { markdown, meaningful };
+  }
+  source.addEventListener('paste', (event) => {
+    if (!event.clipboardData) return;
+    const html = event.clipboardData.getData('text/html');
+    const text = event.clipboardData.getData('text/plain');
+    const isMarkdown = /(?:\*\*\S|__\S|\[[^\]\n]+\]\(https?:\/\/|^\s*#{1,6}\s)/m.test(text);
+    const converted = html && $('richPaste').checked && !isMarkdown ? richTextToMarkdown(html) : null;
+    const markdown = converted?.markdown || text;
+    event.preventDefault();
+    rememberSelection(); insertEditorHtml(PostFormatter.toEditorHtml(markdown));
+  });
+
+  // Exposed for deterministic browser checks; no draft is sent anywhere.
+  window.PostformApp = { richTextToMarkdown, draftMarkdown };
+  render(false);
+  save();
+  window.addEventListener('pagehide', () => {
+    try { localStorage.setItem(storageKey, JSON.stringify(snapshot())); } catch (_) { /* Optional persistence. */ }
+  });
+}());
+</script>
+</body>
+</html>

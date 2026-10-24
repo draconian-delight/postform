@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Format LinkedIn and X posts. Edit visually and copy Unicode bold, bold numbers, italics, and clean spacing.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Postform — format your post</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%234338ca'/%3E%3Ctext x='32' y='46' text-anchor='middle' font-family='Arial,sans-serif' font-size='43' font-weight='700' fill='white'%3EP%3C/text%3E%3C/svg%3E">
+  <style>/* POSTFORM_CSS */</style>
+</head>
+<body>
+  <div class="app">
+    <header class="masthead">
+      <a class="brand" href="#" aria-label="Postform home"><span class="brand-mark" aria-hidden="true">P</span>Postform</a>
+      <span class="platform-label">LinkedIn &amp; X</span>
+    </header>
+    <main>
+      <div class="page-heading"><h1>Format your post</h1><p>Edit on the left. Copy from the right.</p></div>
+      <section class="workspace" aria-label="Post formatter">
+        <div class="editors">
+          <section class="editor-card source-card" aria-labelledby="draftLabel">
+            <div class="card-top"><h2 id="draftLabel">Your draft</h2><button type="button" class="text-button" id="clearDraft" aria-label="Clear draft">Clear</button></div>
+            <div class="editor-toolbar" role="group" aria-label="Text formatting">
+              <button type="button" class="format-button" id="boldText" data-command="bold" title="Bold (Ctrl+B / ⌘B)" aria-label="Bold" aria-pressed="false"><strong>B</strong></button>
+              <button type="button" class="format-button" id="italicText" data-command="italic" title="Italic (Ctrl+I / ⌘I)" aria-label="Italic" aria-pressed="false"><em>I</em></button>
+              <span class="toolbar-divider" aria-hidden="true"></span>
+              <button type="button" class="format-button" id="bulletList" data-command="insertUnorderedList" title="Bullet list" aria-label="Bullet list" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 5h8M8 10h8M8 15h8M3 5h1M3 10h1M3 15h1"/></svg></button>
+              <button type="button" class="format-button" id="editLink" title="Add or edit link" aria-label="Add or edit link"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 12 4-4M7 13l-1 1a3 3 0 0 1-4-4l3-3a3 3 0 0 1 4 0m2 0 1-1a3 3 0 0 1 4 4l-3 3a3 3 0 0 1-4 0"/></svg></button>
+              <button type="button" class="format-button clear-style-button" id="clearFormat" data-command="removeFormat" title="Remove bold and italics" aria-label="Remove formatting"><span aria-hidden="true">T×</span><span class="clear-style-label">Clear style</span></button>
+            </div>
+            <div id="source" class="rich-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="draftLabel" aria-describedby="sourceHelp" spellcheck="true" data-placeholder="Paste your post or start writing…"></div>
+            <div class="card-footer"><span id="sourceHelp">Select text to format</span></div>
+          </section>
+          <section class="editor-card output-card" aria-labelledby="outputLabel">
+            <div class="card-top output-heading"><h2><label id="outputLabel" for="output">Your formatted post</label></h2><button class="button button-primary" id="copyPost" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="7" width="9" height="10" rx="2"/><path d="M12 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg><span id="copyLabel">Copy post</span><span class="keyboard-hint" aria-hidden="true">Ctrl ↵</span></button></div>
+            <p id="outputDescription" class="preview-label">Unicode preview</p>
+            <textarea id="output" readonly spellcheck="false" aria-describedby="outputDescription" placeholder="Your formatted post will appear here."></textarea>
+            <div class="card-footer"><span id="characterCount">0 characters</span><button type="button" class="text-button" id="selectOutput">Select all</button></div>
+          </section>
+        </div>
+        <details class="options-panel" id="optionsPanel">
+          <summary>Options<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4"/></svg></summary>
+          <div class="options-content">
+            <div class="settings-grid">
+              <div class="setting"><label for="spacing">Spacing</label><select id="spacing"><option value="social">Social spacing</option><option value="roomy">Extra space between list items</option><option value="preserve">Keep my line breaks</option></select></div>
+              <div class="setting"><label for="font">Bold style</label><select id="font"><option value="sans">𝗦𝗮𝗻𝘀 + 𝟏𝟐𝟑</option><option value="serif">𝐒𝐞𝐫𝐢𝐟 + 𝟏𝟐𝟑</option></select></div>
+              <div class="setting"><label for="linkStyle">Links</label><select id="linkStyle"><option value="inline">Label + URL</option><option value="newline">URL on a new line</option><option value="label">Label only</option></select></div>
+              <div class="setting"><span class="setting-label">Output</span><div class="format-mode" role="group" aria-label="Output mode"><button type="button" class="mode-button active" id="unicodeMode" aria-pressed="true">Unicode</button><button type="button" class="mode-button" id="plainMode" aria-pressed="false">Plain text</button></div></div>
+            </div>
+            <div class="options-bottom"><label class="paste-setting"><input id="richPaste" type="checkbox" checked> Keep pasted formatting</label><span id="saveStatus">Saved on this device</span></div>
+            <div class="optional-actions"><button type="button" class="button button-outline" id="loadExample">Try an example</button><button type="button" class="button button-outline" id="downloadText">Save post as .txt</button><button type="button" class="button button-outline" id="saveTool">Download app</button></div>
+          </div>
+        </details>
+        <div id="notice" class="notice" role="status" aria-live="polite"></div>
+      </section>
+    </main>
+  </div>
+  <dialog id="linkDialog" aria-labelledby="linkTitle"><form id="linkForm"><h2 id="linkTitle">Edit link</h2><label for="linkText">Text</label><input id="linkText" type="text" required autocomplete="off"><label for="linkUrl">URL</label><input id="linkUrl" type="text" required placeholder="https://example.com" autocomplete="off"><p id="linkError" role="alert"></p><div class="dialog-actions"><button type="button" class="text-button" id="removeLink">Remove link</button><button type="button" class="button button-outline" id="cancelLink">Cancel</button><button type="submit" class="button button-primary">Apply</button></div></form></dialog>
+  <script>/* POSTFORM_ENGINE */</script>
+  <script>/* POSTFORM_APP */</script>
+</body>
+</html>

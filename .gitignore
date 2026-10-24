@@ -1,0 +1,19 @@
+node_modules/
+tests/artifacts/
+tests/native-downloads/
+
+# Generated QA output from earlier local runs.
+tests/*.png
+tests/*-results.json
+tests/*-export.html
+tests/downloaded-*
+
+# Local exports, logs, and editor files.
+*.zip
+*.log
+.env
+.env.*
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

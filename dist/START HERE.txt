@@ -1,0 +1,58 @@
+POSTFORM
+An offline post formatter for LinkedIn and X
+
+1. Double-click Postform.html to open it in your browser.
+2. Paste your Markdown or formatted draft into the left-hand box.
+   It appears as formatted, editable text without Markdown symbols.
+3. Select text and click B for bold or I for italics. You can also
+   edit the wording, add lists, and add or edit links. The right-hand
+   Unicode preview updates live.
+4. Click Copy post, then paste the whole post into LinkedIn or X.
+
+No installation, internet connection, or account is needed.
+
+Bold letters and numbers convert together. Italics, links, emojis,
+and paragraph spacing are handled in the same step. The app starts
+with an empty draft. Use Options > Try an example for a quick demo.
+
+EDITING
+Select text, then click B or I to apply or remove formatting.
+Ctrl+B and Ctrl+I work too (Command+B / Command+I on Mac).
+Use Clear style (T× on small screens) to remove bold and italics.
+The list button creates a bullet list. The link button adds a link;
+click an existing link in your draft to edit its text or URL.
+Ctrl+Z (Command+Z on Mac) undoes edits in the visual editor.
+
+OPTIONS
+Open Options below the editor for spacing, font, and link controls.
+Download actions and the example are here too.
+
+SPACING
+Social: adds blank lines between source lines, keeping lists together.
+Roomy: also adds blank lines between list items.
+Keep my line breaks: preserves the layout you pasted.
+
+LINKS
+Label + URL keeps the destination visible in the post.
+URL on a new line puts destinations below their labels.
+Label only removes destinations from the copied text.
+
+COPYING
+Click Copy post, or use Ctrl+Enter (Command+Enter on Mac).
+If your browser blocks copying, the post will be selected so
+you can copy it using Ctrl+C (Command+C on Mac).
+
+SAVE
+Options > Save post as .txt exports a UTF-8 text file.
+Options > Download app creates another portable HTML copy.
+Your draft and settings are stored locally in this browser when
+local storage is available. Clear the draft to remove it.
+
+NOTES
+Unicode styling supports basic Latin letters and bold digits.
+Italic-only numbers remain normal; bold italic numbers are bold.
+URLs, email addresses, @mentions, and hashtags stay usable.
+Use Plain text to remove formatting. Styled characters may be
+read differently by assistive technology; use plain text when needed.
+The counter measures Unicode code points; platform counters differ.
+This tool formats posts. It does not publish them or split threads.
