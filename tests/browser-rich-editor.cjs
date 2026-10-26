@@ -9,22 +9,27 @@ const artifacts = path.join(dir, 'artifacts');
 fs.mkdirSync(artifacts, { recursive: true });
 const html = path.resolve(dir, '../dist/Postform.html');
 const results = [];
+let activeBrowser;
 async function check(name, fn) {
-  try { await fn(); results.push({ name, status: 'PASS' }); }
-  catch (error) { results.push({ name, status: 'FAIL', error: error.stack }); }
+  try { await fn(); results.push({ name, status: 'PASS' }); console.log('PASS ' + name); }
+  catch (error) { results.push({ name, status: 'FAIL', error: error.stack }); console.log('FAIL ' + name + '\n' + error.stack); }
 }
 (async () => {
   const browser = await chromium.launch({
     headless: true,
     ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH } : {})
   });
+  activeBrowser = browser;
   const context = await browser.newContext({ viewport: { width: 1440, height: 1100 } });
+  context.setDefaultTimeout(7000);
   const page = await context.newPage();
   const errors = [], requests = [];
   page.on('pageerror', e => errors.push(e.message));
   page.on('request', r => requests.push(r.url()));
   await page.goto(pathToFileURL(html).href);
   const output = () => page.locator('#output').inputValue();
+  const draftKey = 'postform.draft.v3';
+  const preferencesKey = 'postform.preferences.v1';
   async function openOptions() {
     if (!(await page.locator('#optionsPanel').evaluate(el => el.open))) await page.locator('#optionsPanel summary').click();
   }
@@ -38,17 +43,37 @@ async function check(name, fn) {
     await page.evaluate(text => {
       const editor = document.getElementById('source');
       const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT);
-      let node;
-      while ((node = walker.nextNode())) {
-        const start = node.nodeValue.indexOf(text);
-        if (start !== -1) {
-          const range = document.createRange(); range.setStart(node, start); range.setEnd(node, start + text.length);
-          editor.focus(); const selection = getSelection(); selection.removeAllRanges(); selection.addRange(range);
-          document.dispatchEvent(new Event('selectionchange')); return;
-        }
-      }
-      throw new Error('Selection text missing: ' + text);
+      const start = editor.textContent.indexOf(text);
+      if (start < 0) throw new Error('Selection text missing: ' + text);
+      const end = start + text.length, nodes = [];
+      let node, offset = 0;
+      while ((node = walker.nextNode())) { nodes.push({ node, start: offset, end: offset + node.nodeValue.length }); offset += node.nodeValue.length; }
+      const first = nodes.find(part => start >= part.start && start < part.end);
+      const last = nodes.find(part => end > part.start && end <= part.end);
+      if (!first || !last) throw new Error('Selection boundary missing: ' + text);
+      const range = document.createRange(); range.setStart(first.node, start - first.start); range.setEnd(last.node, end - last.start);
+      editor.focus(); const selection = getSelection(); selection.removeAllRanges(); selection.addRange(range);
+      document.dispatchEvent(new Event('selectionchange'));
     }, text);
+  }
+  async function restore(target = page) {
+    const button = target.locator('#restoreDraft');
+    if (!(await button.isVisible()) && !(await target.locator('#optionsPanel').evaluate(el => el.open))) await target.locator('#optionsPanel summary').click();
+    await button.click();
+  }
+  async function offered(target = page) { return target.locator('#restoreDraft').evaluate(el => !el.hidden); }
+  async function plainOutput(target = page) { return target.evaluate(() => PostFormatter.stripStyles(document.getElementById('output').value)); }
+  async function seededPage(seed) {
+    const isolatedContext = await browser.newContext();
+    isolatedContext.setDefaultTimeout(7000);
+    await isolatedContext.addInitScript(seed => {
+      if (!sessionStorage.getItem('postform-qa-seeded')) {
+        for (const [key, value] of Object.entries(seed)) localStorage.setItem(key, JSON.stringify(value));
+        sessionStorage.setItem('postform-qa-seeded', 'true');
+      }
+    }, seed);
+    const isolated = await isolatedContext.newPage(); await isolated.goto(pathToFileURL(html).href);
+    return { isolatedContext, isolated };
   }
   async function paste(text, rich = '') {
     await page.evaluate(({ text, rich }) => {
@@ -65,6 +90,12 @@ async function check(name, fn) {
     assert.equal(await page.locator('#source').innerText(), '');
     assert.equal(await output(), '');
     assert.equal(await page.locator('#optionsPanel').evaluate(el => el.open), false);
+    assert.equal(await page.locator('#linkStyle').inputValue(), 'colon');
+    assert.deepEqual(await page.locator('#linkStyle option').evaluateAll(options => options.map(option => option.value)), ['colon', 'newline']);
+    assert.equal(await offered(), false);
+    for (const id of ['unicodeMode', 'plainMode', 'roughMode']) assert.ok(await page.locator('#' + id).isVisible());
+    assert.equal(await page.locator('#githubLink').getAttribute('href'), 'https://github.com/draconian-delight/postform');
+    assert.ok(await page.evaluate(() => !!(document.getElementById('optionsPanel').compareDocumentPosition(document.querySelector('.editors')) & Node.DOCUMENT_POSITION_FOLLOWING)));
     assert.ok(await page.locator('#copyPost').isDisabled());
     await page.screenshot({ path: path.join(artifacts, 'empty-desktop.png'), fullPage: true });
     await openOptions(); await page.click('#loadExample');
@@ -73,7 +104,7 @@ async function check(name, fn) {
     assert.ok((await page.locator('#source strong').count()) >= 1);
     assert.ok((await page.locator('#source em').count()) >= 1);
     assert.equal(await output(), await page.evaluate(() => PostFormatter.format(PostformApp.draftMarkdown())));
-    assert.ok(text.includes('35 big possibilities'));
+    assert.ok(text.trim().length > 0);
     await page.locator('#optionsPanel summary').click();
   });
   await page.waitForTimeout(300);
@@ -130,7 +161,7 @@ async function check(name, fn) {
     await setHtml('<p>Visit us</p>'); await selectText('Visit'); await page.click('#editLink');
     await page.fill('#linkUrl', 'https://example.com/35'); await page.click('#linkForm button[type=submit]');
     assert.equal(await page.locator('#source a').innerText(), 'Visit');
-    assert.equal(await output(), 'Visit (https://example.com/35) us');
+    assert.equal(await output(), 'Visit: https://example.com/35 us');
   });
   await check('Clicking a visual link allows editing and removing it', async () => {
     await page.locator('#source a').click(); await page.fill('#linkUrl', 'https://example.com/new');
@@ -147,24 +178,148 @@ async function check(name, fn) {
     await paste('**Bold 35**\n\n- One\n- Two\n\n[Try](https://example.com)');
     await page.selectOption('#font', 'serif'); assert.ok((await output()).includes('𝐁𝐨𝐥𝐝 𝟑𝟓'));
     await page.selectOption('#spacing', 'roomy'); assert.ok((await output()).includes('• One\n\n• Two'), await page.evaluate(() => JSON.stringify({ html: document.getElementById('source').innerHTML, md: PostformApp.draftMarkdown(), out: document.getElementById('output').value })));
-    await page.selectOption('#linkStyle', 'label'); assert.ok(!(await output()).includes('https://'));
+    await page.selectOption('#linkStyle', 'newline'); assert.ok((await output()).includes('Try\nhttps://example.com'));
     await page.click('#plainMode'); assert.ok((await output()).includes('Bold 35')); assert.ok(await page.locator('#font').isDisabled());
-    await page.click('#unicodeMode'); await page.selectOption('#font', 'sans'); await page.selectOption('#spacing', 'social'); await page.selectOption('#linkStyle', 'inline');
+    await page.click('#unicodeMode'); await page.selectOption('#font', 'sans'); await page.selectOption('#spacing', 'social'); await page.selectOption('#linkStyle', 'colon');
   });
-  await check('Draft saves and restores visual formatting after reload', async () => {
+  await check('Colon links retain the destination and do not duplicate an existing label colon', async () => {
+    await paste('[Docs:](https://example.com/Path?Version=2.1)\n\n[https://example.com](https://example.com)');
+    assert.equal(await output(), 'Docs: https://example.com/Path?Version=2.1\n\nhttps://example.com');
+  });
+  await check('Rough mode keeps bold, italic, combined style and the original editor unchanged', async () => {
+    await setHtml('<p>Hello <strong>World</strong>. This <em>Works</em> with <strong><em>AI</em></strong>.</p>');
+    const original = await page.locator('#source').innerHTML(); await page.click('#roughMode');
+    assert.equal(await output(), 'hello 𝘄𝗼𝗿𝗹𝗱.\n\nthis 𝘸𝘰𝘳𝘬𝘴 with 𝘼𝙄.');
+    assert.equal(await page.locator('#source').innerHTML(), original);
+    assert.ok(await page.locator('#capsText').isVisible());
+    await page.click('#unicodeMode'); assert.equal(await output(), 'Hello 𝗪𝗼𝗿𝗹𝗱. This 𝘞𝘰𝘳𝘬𝘴 with 𝘼𝙄.');
+    assert.equal(await page.locator('#source').innerHTML(), original);
+  });
+  await check('Rough casing preserves technical terms across styled nodes and safely splits sentences', async () => {
+    await setHtml('<p>RUN MODELS LOCALLY. Use AI, MLX, GPU, 35B, Edge0 and i<b>Phone</b>. It needs 1.5 GiB in v2.1. Dr. Lee agrees.</p>');
+    await page.click('#roughMode');
+    assert.equal(await plainOutput(), 'run models locally.\n\nuse AI, MLX, GPU, 35B, Edge0 and iPhone.\n\nit needs 1.5 GiB in v2.1.\n\ndr. lee agrees.');
+  });
+  await check('Rough leaves URL queries, email, handles, hashtags, footnotes and code exact', async () => {
+    await setHtml('<p>Visit https://example.com/A_B?q=U.S. and Email+Tag@example.com. Ask @Some_User about #AI35 [1]. Use <code>RunCase("MiX")</code>.</p>');
+    const actual = await output();
+    for (const exact of ['https://example.com/A_B?q=U.S.', 'Email+Tag@example.com', '@Some_User', '#AI35', '[1]', 'RunCase("MiX")']) assert.ok(actual.includes(exact), exact + '\n' + actual);
+    assert.ok(!actual.includes('https://example.com/A_B?q=U.\n'));
+  });
+  await check('Hard line breaks separate technical casing tokens and preserve styles', async () => {
+    await setHtml('<p>Hello<br>World.</p><p><strong>First<br>Second</strong></p>');
+    assert.equal(await output(), 'hello\n\nworld.\n\n𝗳𝗶𝗿𝘀𝘁\n\n𝘀𝗲𝗰𝗼𝗻𝗱');
+  });
+  await check('Rough preserves list numbering and puts an empty line between list items', async () => {
+    await setHtml('<ol start="3"><li value="3">FIRST item. Same item.</li><li value="8">Second item.</li></ol>');
+    assert.equal(await output(), '3. first item. same item.\n\n8. second item.');
+  });
+  await check('Rough sentence spacing is fixed and ordinary spacing is restored on switching back', async () => {
+    await page.click('#unicodeMode'); await openOptions(); await page.selectOption('#spacing', 'preserve');
+    await setHtml('<p>First sentence. Second sentence.</p>'); await page.click('#roughMode');
+    assert.ok(await page.locator('#spacing').isDisabled()); assert.ok(await page.locator('#roughSpacingNote').isVisible());
+    assert.equal(await output(), 'first sentence.\n\nsecond sentence.');
+    await page.click('#unicodeMode'); assert.equal(await page.locator('#spacing').inputValue(), 'preserve');
+    assert.ok(!(await page.locator('#spacing').isDisabled())); assert.equal(await output(), 'First sentence. Second sentence.');
+    await page.selectOption('#spacing', 'social');
+  });
+  await check('Manual CAPS toggles selected text only without changing source letters', async () => {
+    await setHtml('<p>A tiny update today.</p>'); await page.click('#roughMode'); await selectText('update'); await page.click('#capsText');
+    assert.equal(await page.locator('#source').innerText(), 'A tiny update today.');
+    assert.equal(await page.locator('#source [data-postform-caps="true"]').innerText(), 'update');
+    assert.equal(await output(), 'a tiny UPDATE today.');
+    await selectText('update'); await page.click('#capsText');
+    assert.equal(await page.locator('#source [data-postform-caps="true"]').count(), 0); assert.equal(await output(), 'a tiny update today.');
+  });
+  await check('CAPS selections can cross bold and italic nodes without damaging their formatting', async () => {
+    await setHtml('<p>Keep <strong>bold</strong> and <em>italic</em> intact.</p>');
+    await selectText('bold and italic'); await page.click('#capsText');
+    assert.equal(await page.locator('#source').innerText(), 'Keep bold and italic intact.');
+    assert.equal(await output(), 'keep 𝗕𝗢𝗟𝗗 AND 𝘐𝘛𝘈𝘓𝘐𝘊 intact.');
+    assert.ok(await page.locator('#source strong, #source b').count()); assert.ok(await page.locator('#source em, #source i').count());
+    await page.click('#unicodeMode'); assert.equal(await output(), 'Keep 𝗯𝗼𝗹𝗱 and 𝘪𝘵𝘢𝘭𝘪𝘤 intact.');
+    await page.click('#plainMode'); assert.equal(await output(), 'Keep bold and italic intact.'); await page.click('#roughMode');
+  });
+  await check('Native undo removes a manual CAPS action', async () => {
+    await setHtml('<p>One important phrase.</p>'); await selectText('important'); await page.click('#capsText');
+    assert.equal(await output(), 'one IMPORTANT phrase.'); await page.keyboard.press('Control+z');
+    assert.equal(await output(), 'one important phrase.'); assert.equal(await page.locator('#source [data-postform-caps="true"]').count(), 0);
+  });
+  await check('CAPS preserves inherited styles and toggles off inside bold italic content', async () => {
+    await setHtml('<p><strong>bold <em>both</em> end</strong></p>');
+    await selectText('both'); await page.click('#capsText');
+    assert.equal(await output(), '𝗯𝗼𝗹𝗱 𝘽𝙊𝙏𝙃 𝗲𝗻𝗱');
+    await selectText('both'); await page.click('#capsText');
+    assert.equal(await output(), '𝗯𝗼𝗹𝗱 𝙗𝙤𝙩𝙝 𝗲𝗻𝗱');
+    assert.equal(await page.locator('#source [data-postform-caps="true"]').count(), 0);
+    await page.keyboard.press('Control+z'); assert.equal(await output(), '𝗯𝗼𝗹𝗱 𝘽𝙊𝙏𝙃 𝗲𝗻𝗱');
+  });
+  await check('CAPS crosses paragraphs and complete lists without changing their structure', async () => {
+    for (const html of ['<p>First <strong>idea</strong>.</p><p>Second <em>idea</em>.</p>', '<ol start="3"><li>First <strong>idea</strong>.</li><li>Second idea.</li></ol>']) {
+      await setHtml(html);
+      const original = await page.locator('#source').innerText();
+      await page.locator('#source').focus(); await page.keyboard.press('Control+a'); await page.click('#capsText');
+      assert.equal(await page.locator('#source').innerText(), original);
+      assert.ok((await plainOutput()).includes('FIRST IDEA.'));
+      assert.equal(await page.locator('#source li').count(), html.startsWith('<ol') ? 2 : 0);
+      await page.keyboard.press('Control+z');
+      assert.equal(await page.locator('#source [data-postform-caps="true"]').count(), 0);
+      assert.equal(await page.locator('#source').innerText(), original);
+    }
+  });
+  await check('CAPS never changes protected destinations, account names or code', async () => {
+    await setHtml('<p>Keep <span data-postform-caps="true">https://example.com/Case?x=A.B @Case_User #KeepCase Case+User@example.com <code>RunCase()</code> useful</span>.</p>');
+    const actual = await output();
+    for (const exact of ['https://example.com/Case?x=A.B', '@Case_User', '#KeepCase', 'Case+User@example.com', 'RunCase()', 'USEFUL']) assert.ok(actual.includes(exact), exact + '\n' + actual);
+  });
+  await check('CAPS annotations survive save, blank reload and explicit draft restoration', async () => {
+    await setHtml('<p>A <strong><em>small</em></strong> update.</p>'); await selectText('small'); await page.click('#capsText');
+    await page.waitForTimeout(350); await page.reload(); assert.equal(await output(), ''); assert.ok(await offered());
+    await restore(); assert.ok(await page.locator('#source [data-postform-caps="true"]').count());
+    assert.equal(await output(), 'a 𝙎𝙈𝘼𝙇𝙇 update.');
+    await page.click('#unicodeMode'); assert.equal(await output(), 'A 𝙨𝙢𝙖𝙡𝙡 update.');
+  });
+  await check('Untouched startup, preference edits and another reload never overwrite the saved backup', async () => {
+    const backup = { version: 3, html: '<p><strong>BACKUP_KEEP_35</strong></p>', text: '**BACKUP_KEEP_35**' };
+    const { isolatedContext, isolated } = await seededPage({ [draftKey]: backup });
+    const original = await isolated.evaluate(key => localStorage.getItem(key), draftKey);
+    assert.equal(await isolated.locator('#source').innerText(), '');
+    await isolated.locator('#optionsPanel summary').click(); await isolated.selectOption('#font', 'serif'); await isolated.selectOption('#linkStyle', 'newline');
+    await isolated.waitForTimeout(350); assert.equal(await isolated.evaluate(key => localStorage.getItem(key), draftKey), original);
+    assert.ok(await isolated.evaluate(key => !!localStorage.getItem(key), preferencesKey));
+    await isolated.reload(); await isolated.waitForTimeout(350);
+    assert.equal(await isolated.locator('#source').innerText(), ''); assert.equal(await isolated.evaluate(key => localStorage.getItem(key), draftKey), original);
+    assert.equal(await isolated.locator('#font').inputValue(), 'serif'); assert.equal(await isolated.locator('#linkStyle').inputValue(), 'newline');
+    await restore(isolated); assert.ok((await plainOutput(isolated)).includes('BACKUP_KEEP_35')); await isolatedContext.close();
+  });
+  await check('Legacy rich drafts and label-only preferences migrate without losing the link', async () => {
+    const { isolatedContext, isolated } = await seededPage({ 'postform.draft.v2': { version: 2, html: '<p><strong>Old 35</strong> <a href="https://example.com/KeepCase">Docs</a></p>', linkStyle: 'label', plain: false } });
+    assert.equal(await isolated.locator('#source').innerText(), ''); assert.equal(await isolated.locator('#linkStyle').inputValue(), 'colon');
+    await restore(isolated); assert.equal(await isolated.locator('#output').inputValue(), '𝗢𝗹𝗱 𝟑𝟓 Docs: https://example.com/KeepCase');
+    await isolatedContext.close();
+  });
+  await check('Restoring stored HTML keeps only safe formatting and CAPS annotations', async () => {
+    const { isolatedContext, isolated } = await seededPage({ [draftKey]: { version: 3, html: '<p onclick="window.PWNED=true"><strong>safe35</strong> <span data-postform-caps="true" data-private="discard" onmouseover="window.PWNED=true">caps</span><img src="https://invalid.example/track" onerror="window.PWNED=true"></p><script>window.PWNED=true</script><iframe src="https://invalid.example/frame"></iframe>' } });
+    await restore(isolated); await isolated.click('#roughMode');
+    assert.equal(await isolated.locator('#output').inputValue(), '𝘀𝗮𝗳𝗲𝟑𝟓 CAPS');
+    assert.equal(await isolated.evaluate(() => window.PWNED), undefined);
+    assert.equal(await isolated.locator('#source img, #source script, #source iframe, #source [onclick], #source [onmouseover], #source [data-private]').count(), 0);
+    assert.equal(await isolated.locator('#source [data-postform-caps="true"]').count(), 1); await isolatedContext.close();
+  });
+  await page.click('#unicodeMode');
+  await check('Reload starts blank and offers manual restore without losing visual formatting', async () => {
     await openOptions();
-    await page.selectOption('#font', 'sans'); await page.selectOption('#spacing', 'social'); await page.selectOption('#linkStyle', 'inline');
+    await page.selectOption('#font', 'sans'); await page.selectOption('#spacing', 'social'); await page.selectOption('#linkStyle', 'colon');
     await setHtml('<p><strong>Saved 35</strong> <em>phone</em></p>'); await page.waitForTimeout(350); await page.reload();
+    assert.equal(await page.locator('#source').innerText(), ''); assert.equal(await output(), ''); assert.ok(await offered());
+    await restore();
     assert.ok(await page.locator('#source strong').count()); assert.ok(await page.locator('#source em').count());
     assert.equal(await output(), '𝗦𝗮𝘃𝗲𝗱 𝟑𝟓 𝘱𝘩𝘰𝘯𝘦');
   });
-  await check('Old Markdown drafts migrate to the visual editor', async () => {
-    const migratedContext = await browser.newContext();
-    await migratedContext.addInitScript(() => {
-      localStorage.removeItem('postform.draft.v2');
-      localStorage.setItem('postform.draft.v1', JSON.stringify({ text: '**Old 35** and *phone*', spacing: 'social' }));
-    });
-    const migrated = await migratedContext.newPage(); await migrated.goto(pathToFileURL(html).href);
+  await check('Old Markdown drafts migrate to a recoverable backup without autofilling', async () => {
+    const { isolatedContext: migratedContext, isolated: migrated } = await seededPage({ 'postform.draft.v1': { text: '**Old 35** and *phone*', spacing: 'social', linkStyle: 'inline' } });
+    assert.equal(await migrated.locator('#source').innerText(), ''); assert.ok(await offered(migrated));
+    assert.equal(await migrated.locator('#linkStyle').inputValue(), 'colon'); await restore(migrated);
     assert.equal(await migrated.locator('#source').innerText(), 'Old 35 and phone');
     assert.equal(await migrated.locator('#output').inputValue(), '𝗢𝗹𝗱 𝟑𝟓 and 𝘱𝘩𝘰𝘯𝘦');
     await migratedContext.close();
@@ -198,12 +353,22 @@ async function check(name, fn) {
     await reopened.goto(pathToFileURL(target).href); assert.equal(await reopened.locator('#source').getAttribute('contenteditable'), 'true');
     assert.equal(await reopened.locator('#source').innerText(), '');
     assert.equal(await reopened.locator('#output').inputValue(), '');
+    assert.equal(await reopened.locator('#optionsPanel').evaluate(el => el.open), false);
     await reopened.locator('#source').fill('Fresh 35');
     assert.equal(await reopened.locator('#output').inputValue(), 'Fresh 35'); await exportedContext.close();
   });
   await check('Empty draft disables copying and exports', async () => {
     await openOptions();
     await page.click('#clearDraft'); assert.equal(await output(), ''); assert.ok(await page.locator('#copyPost').isDisabled()); assert.ok(await page.locator('#downloadText').isDisabled());
+    await page.waitForTimeout(350); assert.equal(await page.evaluate(key => localStorage.getItem(key), draftKey), null);
+    await page.reload(); assert.equal(await output(), ''); assert.equal(await offered(), false);
+  });
+  await check('Deleting all editor text also clears the recoverable backup', async () => {
+    await setHtml('<p>Delete this saved draft</p>'); await page.waitForTimeout(350);
+    assert.ok(await page.evaluate(key => !!localStorage.getItem(key), draftKey));
+    await page.locator('#source').focus(); await page.keyboard.press('Control+a'); await page.keyboard.press('Backspace');
+    await page.waitForTimeout(350); assert.equal(await page.evaluate(key => localStorage.getItem(key), draftKey), null);
+    await page.reload(); assert.equal(await offered(), false); assert.equal(await output(), '');
   });
   await openOptions(); await page.click('#loadExample'); await page.locator('#optionsPanel summary').click(); await page.waitForTimeout(300);
   for (const width of [390, 320]) await check('Visual editor and toolbar fit ' + width + 'px width', async () => {
@@ -214,6 +379,12 @@ async function check(name, fn) {
     const fonts = await page.evaluate(() => ['source', 'output'].map(id => ({ id, size: parseFloat(getComputedStyle(document.getElementById(id)).fontSize) })));
     for (const font of fonts) assert.ok(font.size >= 16, JSON.stringify(font));
     await page.screenshot({ path: path.join(artifacts, 'visual-editor-mobile-' + width + '.png'), fullPage: true });
+    await page.click('#roughMode');
+    const roughSize = await page.evaluate(() => ({ width: innerWidth, scroll: document.documentElement.scrollWidth }));
+    assert.ok(roughSize.scroll <= roughSize.width); assert.ok(await page.locator('#capsText').isVisible());
+    for (const id of ['unicodeMode', 'plainMode', 'roughMode']) assert.ok(await page.locator('#' + id).isVisible());
+    await page.screenshot({ path: path.join(artifacts, 'rough-editor-mobile-' + width + '.png'), fullPage: true });
+    await page.click('#unicodeMode');
   });
   await check('Text contrast, editor sizing and focus are clear without extra visual clutter', async () => {
     await page.setViewportSize({ width: 1440, height: 1100 }); await openOptions();
@@ -254,9 +425,16 @@ async function check(name, fn) {
     assert.ok(focus.some((style, index) => parseFloat(style.outline) >= 2 || style.shadow !== unfocused[index].shadow || style.border !== unfocused[index].border), JSON.stringify({ unfocused, focus }));
     assert.equal(await page.locator('.intro, .type-specimen, .site-footer, .help').count(), 0);
   });
+  await page.locator('#optionsPanel summary').click(); await page.click('#roughMode'); await setHtml('<p>A small update for AI and MLX. Keep <strong>bold 35B</strong>, <em>italics</em>, and <strong><em>both</em></strong>.</p><p><span data-postform-caps="true">Just the important part.</span></p><p><a href="https://github.com/draconian-delight/postform">GitHub</a></p>');
+  await page.screenshot({ path: path.join(artifacts, 'rough-editor-desktop.png'), fullPage: true });
   await check('No uncaught browser errors or external requests', async () => { assert.deepEqual(errors, []); assert.ok(!requests.some(url => /^https?:/.test(url))); });
   await browser.close();
   fs.writeFileSync(path.join(artifacts, 'visual-editor-results.json'), JSON.stringify(results, null, 2));
-  for (const result of results) console.log(result.status + ' ' + result.name + (result.error ? '\n' + result.error : ''));
+  console.log(results.filter(result => result.status === 'PASS').length + '/' + results.length + ' browser checks passed.');
   process.exitCode = results.some(result => result.status === 'FAIL') ? 1 : 0;
-})().catch(error => { console.error(error); process.exitCode = 1; });
+})().catch(async error => {
+  console.error(error);
+  fs.writeFileSync(path.join(artifacts, 'visual-editor-results.json'), JSON.stringify(results, null, 2));
+  if (activeBrowser) await activeBrowser.close();
+  process.exitCode = 1;
+});

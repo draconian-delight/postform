@@ -12,9 +12,11 @@ Download [Postform.html](https://github.com/draconian-delight/postform/releases/
 2. Edit visually. Select text to add bold, italics, lists, or links.
 3. Click **Copy post**, then paste into LinkedIn or X.
 
-Open **Options** when you want to change spacing, bold style, links, or plain text output. It also contains **Try an example**, **Save post as .txt**, and **Download app**. Ctrl/⌘B and Ctrl/⌘I format selected text; Ctrl/⌘Enter copies the post.
+Choose **Unicode**, **Plain**, or **Rough** above the editor. **Options** is beside the modes and starts collapsed. Open it for spacing, font, and link settings, **Try an example**, **Save post as .txt**, and **Download app**. Ctrl/⌘B and Ctrl/⌘I format selected text; Ctrl/⌘Enter copies the post.
 
-Drafts and settings stay in your browser’s local storage when available. There are no uploads, analytics, external scripts, or remote fonts. Local drafts can depend on the browser and file location.
+Every opening starts with an empty editor. Click **Restore draft** to recover your last saved draft, including its formatting and CAPS annotations. Drafts and settings are saved separately: changing settings or closing an untouched empty editor leaves your saved draft intact. **Clear** removes both the current draft and its backup; deleting all editor text also clears the backup. Drafts from earlier versions migrate to a manually recoverable backup.
+
+Storage stays in your browser when available and can depend on the browser and file location. There are no uploads, analytics, external scripts, or remote fonts.
 
 ## Formatting
 
@@ -22,8 +24,19 @@ Drafts and settings stay in your browser’s local storage when available. There
 - Markdown headings, links, lists, inline code, and fenced code.
 - Bold, italic, links, and lists pasted from common document editors.
 - Social spacing, spaced lists, or your original line breaks.
+- Visible link destinations: **Label: URL** by default, or **URL on a new line**.
 
-Styled alphabets cover basic Latin letters. Accented letters, other scripts, and emojis stay as typed. Italic-only numbers stay normal because Unicode has no italic digit alphabet. URLs, email addresses, @mentions, hashtags, footnote markers, and code keep their original characters. Link destinations appear as visible URLs unless **Label only** is selected. The character counter measures Unicode code points; platform limits can differ. Unicode styled letters can be read differently by screen readers; **Plain text** provides an unstyled alternative.
+Styled alphabets cover basic Latin letters. Accented letters, other scripts, and emojis stay as typed. Italic-only numbers stay normal because Unicode has no italic digit alphabet. URLs, email addresses, @mentions, hashtags, footnote markers, and code keep their original characters. The character counter measures Unicode code points; platform limits can differ. Unicode styled letters can be read differently by screen readers; **Plain** provides an unstyled alternative.
+
+## Rough mode
+
+Rough changes only the right-hand output. It lowercases ordinary English prose, puts each sentence in its own paragraph, and separates list items with blank lines. It retains all original bold, italics, and combined formatting.
+
+A fixed set of technical abbreviations and units, mixed-case names, and identifiers with digits preserve terms such as `AI`, `MLX`, `GiB`, `Edge0`, `35B`, and `iPhone`. Ordinary all-caps words are lowercased. Sentence spacing protects URLs, code, decimals, versions, and common English abbreviations. This uses local rules, without AI rewriting or network requests.
+
+Select text and click **CAPS** to toggle uppercase emphasis. The source letters stay unchanged; a dotted underline shows the annotation while Rough is active. CAPS supports native undo and draft restoration. Unicode and Plain ignore these annotations. URLs, email addresses, handles, hashtags, and code remain unchanged even inside a CAPS selection.
+
+Rough has fixed sentence spacing. Switching back restores your ordinary spacing setting.
 
 ## Develop
 
@@ -35,6 +48,8 @@ npm test
 ```
 
 The build creates identical standalone files at `dist/Postform.html` and `dist/index.html`. Edit the files in `src/`, then rebuild.
+
+The conversion API defaults to `linkStyle: 'colon'`. Explicit legacy `inline` and `label` values remain supported for callers; the visual editor keeps its own label-only link parsing.
 
 For browser checks:
 

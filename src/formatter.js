@@ -183,12 +183,18 @@
             var label = text.slice(labelStart + 1, labelEnd);
             var url = destination(text.slice(labelEnd + 2, urlEnd));
             var children = parseInline(label, options, depth + 1);
+            if (options.linkStyle === 'colon' && children.length) {
+              children[0].text = children[0].text.trimStart();
+              children[children.length - 1].text = children[children.length - 1].text.trimEnd();
+            }
             var readableLabel = children.map(function (part) { return part.text; }).join('');
             var suffix = '';
             if (url && options.linkStyle !== 'label') {
               if (!readableLabel.trim() || stripStyles(readableLabel.trim()) === url) {
                 children = [{ text: url, literal: true }];
-              } else suffix = options.linkStyle === 'newline' ? '\n' + url : ' (' + url + ')';
+              } else if (options.linkStyle === 'newline') suffix = '\n' + url;
+              else if (options.linkStyle === 'colon') suffix = (/[:：]$/.test(readableLabel.trim()) ? ' ' : ': ') + url;
+              else suffix = ' (' + url + ')';
             }
             tokens.push({ type: 'node', children: children, suffix: suffix, href: url });
             i = urlEnd + 1; continue;
@@ -201,7 +207,7 @@
       }
       var protectedEnd = protectedSpan(text, i);
       if (protectedEnd > i) {
-        addText(tokens, text.slice(i, protectedEnd), true); i = protectedEnd; continue;
+        addText(tokens, text.slice(i, protectedEnd).replace(/\\([!"#$%&'()*+,\-./:;<=>?@[\]\\^_`{|}~])/g, '$1'), true); i = protectedEnd; continue;
       }
       if (ch === '*' || ch === '_') {
         var runEnd = i + 1;
@@ -279,7 +285,7 @@
     options = options || {};
     return {
       spacing: ['preserve', 'social', 'roomy'].indexOf(options.spacing) >= 0 ? options.spacing : 'social',
-      linkStyle: ['inline', 'newline', 'label'].indexOf(options.linkStyle) >= 0 ? options.linkStyle : 'inline',
+      linkStyle: ['colon', 'inline', 'newline', 'label'].indexOf(options.linkStyle) >= 0 ? options.linkStyle : 'colon',
       font: options.font === 'serif' ? 'serif' : 'sans',
       plain: !!options.plain, bold: options.bold !== false, italic: options.italic !== false
     };
@@ -355,6 +361,110 @@
     });
   }
 
+  var ROUGH_TECH_TERMS = new Set(('AI MLX GPU CPU TPU NPU VRAM RAM ROM SSD HDD USB TCP UDP HTTP HTTPS URL URI HTML CSS XML JSON YAML SQL CSV TSV UTF ASCII CLI GUI SDK API APIs SDKs LLM LLMs IDE JVM JDK JRE WASM SIMD AVX CUDA ROCm OpenCL LLVM ONNX NLP ANN HNSW IVF MMR BM25 FP32 FP16 BF16 INT8 INT4 RAG GPT US UK EU U.S U.K U.N').toLowerCase().split(/\s+/));
+  var ROUGH_UNITS = new Set(('B bit bits byte bytes KB MB GB TB PB EB KiB MiB GiB TiB PiB EiB bps kbps Mbps Gbps Hz kHz MHz GHz THz ns us µs μs ms s sec min h K °C °F V mV A mA W mW kW J mJ kJ m cm mm km g kg mg mol Pa kPa MPa').toLowerCase().split(/\s+/));
+  var ROUGH_ABBREVIATIONS = new Set(('dr mr mrs ms prof sr jr st mt capt gen lt col sgt rev hon pres gov sen rep supt det vs etc fig figs eq eqs no nos vol vols p pp dept approx incl misc jan feb mar apr jun jul aug sep sept oct nov dec inc ltd co corp e.g i.e a.m p.m u.s u.k u.n ph.d m.d b.sc m.sc').split(/\s+/));
+
+  function roughProtectedSpan(text, start) {
+    var end = protectedSpan(text, start);
+    if (end > start) return end;
+    if (start && isWord(previousCharacter(text, start))) return start;
+    // Visible link labels can contain a domain without an https:// prefix.
+    var domain = /^(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}(?::\d{1,5})?(?:[/?#][^\s<>`]+)?/.exec(text.slice(start));
+    if (!domain) return start;
+    var value = domain[0].replace(/[.,!?:;*_]+$/, '');
+    [['(', ')'], ['[', ']'], ['{', '}']].forEach(function (pair) {
+      var opens = value.split(pair[0]).length - 1, closes = value.split(pair[1]).length - 1;
+      while (closes > opens && value.endsWith(pair[1])) { value = value.slice(0, -1); closes--; }
+    });
+    return start + value.length;
+  }
+
+  // Transform prose across styled DOM text-node boundaries, then return the
+  // pieces to their original runs. The caller can update a clone of the editor
+  // without changing the draft, metadata, or the number of text nodes.
+  function transformRoughRuns(runs, settings) {
+    if (!Array.isArray(runs)) return [];
+    var source = runs.map(function (run) { return String(run && run.text != null ? run.text : ''); });
+    var result = runs.map(function (run) { return Object.assign({}, run, { text: '' }); });
+    var text = source.join('');
+    if (!text) return result;
+    var owner = new Int32Array(text.length), protectedMask = new Uint8Array(text.length);
+    var atomicMask = new Uint8Array(text.length), technicalMask = new Uint8Array(text.length);
+    var offset = 0;
+    runs.forEach(function (run, index) {
+      var end = offset + source[index].length;
+      owner.fill(index, offset, end);
+      if (run && run.literal) protectedMask.fill(1, offset, end);
+      if (run && run.atomic) atomicMask.fill(1, offset, end);
+      offset = end;
+    });
+    for (var cursor = 0; cursor < text.length;) {
+      if (protectedMask[cursor]) { cursor++; continue; }
+      var protectedEnd = roughProtectedSpan(text, cursor);
+      if (protectedEnd > cursor) { protectedMask.fill(1, cursor, protectedEnd); cursor = protectedEnd; }
+      else cursor += String.fromCodePoint(text.codePointAt(cursor)).length;
+    }
+    var words = /[\p{L}\p{N}]+(?:[-._/+][\p{L}\p{N}]+)*/gu, word;
+    while ((word = words.exec(text))) {
+      var readable = stripStyles(word[0]);
+      if (ROUGH_TECH_TERMS.has(readable.toLowerCase()) || ROUGH_UNITS.has(readable.toLowerCase()) && readable.length > 1 && !/^(?:bits?|bytes?|sec|min|mol)$/i.test(readable) ||
+          /[a-z][A-Z]/.test(readable) || /\p{L}/u.test(readable) && /\p{N}/u.test(readable)) {
+        technicalMask.fill(1, word.index, word.index + word[0].length);
+      }
+    }
+    var quantity = /[\p{N}]+(?:\.[\p{N}]+)?[ \t\u00a0]+([A-Za-zµμ°]+(?:\/[A-Za-zµμ°]+)?)/gu, unit;
+    while ((unit = quantity.exec(text))) {
+      if (ROUGH_UNITS.has(unit[1].toLowerCase())) {
+        var unitStart = unit.index + unit[0].length - unit[1].length;
+        technicalMask.fill(1, unitStart, unit.index + unit[0].length);
+      }
+    }
+
+    var spaces = [];
+    if (!settings || settings.sentenceSpacing !== false) {
+      for (var at = 0; at < text.length;) {
+        var punctuation = text[at];
+        if (!/[.!?。！？]/.test(punctuation) || protectedMask[at] || atomicMask[at]) { at++; continue; }
+        var punctuationEnd = at + 1;
+        while (punctuationEnd < text.length && /[.!?。！？]/.test(text[punctuationEnd]) && !protectedMask[punctuationEnd] && !atomicMask[punctuationEnd]) punctuationEnd++;
+        var closeEnd = punctuationEnd;
+        while (closeEnd < text.length && /["'’”»）)\]}]/.test(text[closeEnd]) && !protectedMask[closeEnd]) closeEnd++;
+        var gapEnd = closeEnd;
+        while (gapEnd < text.length && /\s/u.test(text[gapEnd]) && !protectedMask[gapEnd] && !atomicMask[gapEnd]) gapEnd++;
+        var next = text[gapEnd] || '';
+        var hasGap = gapEnd > closeEnd;
+        var validBreak = !!next && (hasGap || /[!?。！？]/.test(punctuation) || /[A-Z\u3400-\u9fff]/.test(next));
+        if (punctuation === '.' && punctuationEnd === at + 1) {
+          if (/\d/.test(text[at - 1] || '') && /\d/.test(text[at + 1] || '')) validBreak = false;
+          var abbreviation = /([A-Za-z][A-Za-z.]*)\.$/.exec(text.slice(0, punctuationEnd));
+          if (abbreviation && ROUGH_ABBREVIATIONS.has(abbreviation[1].toLowerCase())) validBreak = false;
+          if (abbreviation && /^[A-Z]$/.test(abbreviation[1]) && /^[A-Z]/.test(next)) validBreak = false;
+        }
+        if (validBreak && !/[.!?。！？]/.test(next) && !protectedMask[closeEnd] && !atomicMask[closeEnd]) spaces.push({ start: closeEnd, end: gapEnd });
+        at = Math.max(punctuationEnd, gapEnd);
+      }
+    }
+    var operation = 0;
+    for (var index = 0; index < text.length;) {
+      var spacing = spaces[operation];
+      if (spacing && spacing.start === index) {
+        result[owner[index]].text += '\n\n';
+        index = spacing.end; operation++;
+        if (index >= text.length) break;
+      }
+      var ch = String.fromCodePoint(text.codePointAt(index));
+      var runIndex = owner[index];
+      if (protectedMask[index]) result[runIndex].text += ch;
+      else {
+        var plain = stripStyles(ch);
+        result[runIndex].text += runs[runIndex] && runs[runIndex].caps ? plain.toUpperCase() : technicalMask[index] ? plain : plain.toLowerCase();
+      }
+      index += ch.length;
+    }
+    return result;
+  }
+
   // Reuse the emphasis parser for the visual editor; imported HTML is escaped
   // here rather than trusting markup supplied by the clipboard or local storage.
   function toEditorHtml(value) {
@@ -420,6 +530,6 @@
     return output.join('');
   }
 
-  return Object.freeze({ format: format, stylize: stylize, stripStyles: stripStyles, toEditorHtml: toEditorHtml,
+  return Object.freeze({ format: format, stylize: stylize, stripStyles: stripStyles, toEditorHtml: toEditorHtml, transformRoughRuns: transformRoughRuns,
     countCodePoints: function (value) { return Array.from(String(value == null ? '' : value)).length; } });
 });

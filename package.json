@@ -1,6 +1,6 @@
 {
   "name": "postform",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "An offline Unicode formatter for LinkedIn and X posts.",
   "engines": {
     "node": ">=20"

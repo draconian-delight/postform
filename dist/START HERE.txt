@@ -1,4 +1,4 @@
-POSTFORM
+POSTFORM 0.2.0
 An offline post formatter for LinkedIn and X
 
 1. Double-click Postform.html to open it in your browser.
@@ -24,8 +24,25 @@ click an existing link in your draft to edit its text or URL.
 Ctrl+Z (Command+Z on Mac) undoes edits in the visual editor.
 
 OPTIONS
-Open Options below the editor for spacing, font, and link controls.
-Download actions and the example are here too.
+Choose Unicode, Plain, or Rough above the editor.
+Options is beside the modes and starts collapsed. Open it for
+spacing, font, links, downloads, and the example.
+
+ROUGH MODE
+Rough changes only the preview, keeping your source unchanged.
+Ordinary English becomes lowercase. Technical terms such as AI,
+MLX, GiB, Edge0, 35B, and iPhone retain their case through local
+rules. Original bold, italics, and bold italics are all retained.
+Each sentence gets its own paragraph. Lists keep their numbering
+and have blank lines between items. URLs, code, decimals, versions,
+and common English abbreviations are protected from splitting.
+Rough uses fixed spacing; switching back restores your preference.
+
+Select text and click CAPS to mark or unmark uppercase emphasis.
+The source letters stay unchanged, with a dotted underline in Rough.
+CAPS supports undo and is saved with your draft. It is ignored in
+Unicode and Plain. URLs, email, handles, hashtags, and code always
+keep their original characters, even when marked as CAPS.
 
 SPACING
 Social: adds blank lines between source lines, keeping lists together.
@@ -33,9 +50,8 @@ Roomy: also adds blank lines between list items.
 Keep my line breaks: preserves the layout you pasted.
 
 LINKS
-Label + URL keeps the destination visible in the post.
+Label: URL is the default, keeping the destination visible.
 URL on a new line puts destinations below their labels.
-Label only removes destinations from the copied text.
 
 COPYING
 Click Copy post, or use Ctrl+Enter (Command+Enter on Mac).
@@ -45,14 +61,24 @@ you can copy it using Ctrl+C (Command+C on Mac).
 SAVE
 Options > Save post as .txt exports a UTF-8 text file.
 Options > Download app creates another portable HTML copy.
-Your draft and settings are stored locally in this browser when
-local storage is available. Clear the draft to remove it.
+Every opening starts empty. Click Restore draft to recover your
+last saved draft, including formatting and CAPS annotations.
+Drafts and settings are stored separately in this browser when
+local storage is available. An untouched blank editor, changing
+settings, or closing the page without editing will not overwrite
+the backup. Earlier drafts migrate to a recoverable backup.
+Clear removes the current draft and backup. Deleting all editor
+text also removes the backup. Storage depends on your browser and
+the HTML file location; keep using the same file to restore drafts.
 
 NOTES
 Unicode styling supports basic Latin letters and bold digits.
 Italic-only numbers remain normal; bold italic numbers are bold.
 URLs, email addresses, @mentions, and hashtags stay usable.
-Use Plain text to remove formatting. Styled characters may be
+Use Plain to remove formatting. Styled characters may be
 read differently by assistive technology; use plain text when needed.
 The counter measures Unicode code points; platform counters differ.
 This tool formats posts. It does not publish them or split threads.
+
+SOURCE AND UPDATES
+https://github.com/draconian-delight/postform

@@ -13,17 +13,33 @@
   <div class="app">
     <header class="masthead">
       <a class="brand" href="#" aria-label="Postform home"><span class="brand-mark" aria-hidden="true">P</span>Postform</a>
-      <span class="platform-label">LinkedIn &amp; X</span>
+      <div class="header-links"><span class="platform-label">LinkedIn &amp; X</span><a id="githubLink" class="github-link" href="https://github.com/draconian-delight/postform" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a></div>
     </header>
     <main>
       <div class="page-heading"><h1>Format your post</h1><p>Edit on the left. Copy from the right.</p></div>
       <section class="workspace" aria-label="Post formatter">
+        <div class="workspace-controls">
+          <div class="output-mode-bar"><div class="format-mode" role="group" aria-label="Output mode"><button type="button" class="mode-button active" id="unicodeMode" aria-pressed="true">Unicode</button><button type="button" class="mode-button" id="plainMode" aria-pressed="false">Plain</button><button type="button" class="mode-button" id="roughMode" aria-pressed="false">Rough</button></div></div>
+          <details class="options-panel" id="optionsPanel">
+            <summary>Options<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4"/></svg></summary>
+            <div class="options-content">
+              <div class="settings-grid">
+                <div class="setting"><label for="spacing">Spacing</label><select id="spacing"><option value="social">Social spacing</option><option value="roomy">Extra space between list items</option><option value="preserve">Keep my line breaks</option></select><span id="roughSpacingNote" class="rough-spacing-note" hidden>Rough uses sentence spacing.</span></div>
+                <div class="setting"><label for="font">Bold style</label><select id="font"><option value="sans">𝗦𝗮𝗻𝘀 + 𝟏𝟐𝟑</option><option value="serif">𝐒𝐞𝐫𝐢𝐟 + 𝟏𝟐𝟑</option></select></div>
+                <div class="setting"><label for="linkStyle">Links</label><select id="linkStyle"><option value="colon">Label: URL</option><option value="newline">URL on a new line</option></select></div>
+              </div>
+              <div class="options-bottom"><label class="paste-setting"><input id="richPaste" type="checkbox" checked> Keep pasted formatting</label><span id="saveStatus">Drafts saved on this device</span></div>
+              <div class="optional-actions"><button type="button" class="button button-outline" id="loadExample">Try an example</button><button type="button" class="button button-outline" id="downloadText">Save post as .txt</button><button type="button" class="button button-outline" id="saveTool">Download app</button></div>
+            </div>
+          </details>
+        </div>
         <div class="editors">
           <section class="editor-card source-card" aria-labelledby="draftLabel">
-            <div class="card-top"><h2 id="draftLabel">Your draft</h2><button type="button" class="text-button" id="clearDraft" aria-label="Clear draft">Clear</button></div>
+            <div class="card-top"><h2 id="draftLabel">Your draft</h2><div class="draft-actions"><button type="button" class="text-button" id="restoreDraft" hidden>Restore draft</button><button type="button" class="text-button" id="clearDraft" aria-label="Clear draft">Clear</button></div></div>
             <div class="editor-toolbar" role="group" aria-label="Text formatting">
               <button type="button" class="format-button" id="boldText" data-command="bold" title="Bold (Ctrl+B / ⌘B)" aria-label="Bold" aria-pressed="false"><strong>B</strong></button>
               <button type="button" class="format-button" id="italicText" data-command="italic" title="Italic (Ctrl+I / ⌘I)" aria-label="Italic" aria-pressed="false"><em>I</em></button>
+              <button type="button" class="format-button caps-button" id="capsText" title="Toggle uppercase emphasis in Rough output" aria-label="CAPS emphasis" aria-pressed="false" hidden disabled>CAPS</button>
               <span class="toolbar-divider" aria-hidden="true"></span>
               <button type="button" class="format-button" id="bulletList" data-command="insertUnorderedList" title="Bullet list" aria-label="Bullet list" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 5h8M8 10h8M8 15h8M3 5h1M3 10h1M3 15h1"/></svg></button>
               <button type="button" class="format-button" id="editLink" title="Add or edit link" aria-label="Add or edit link"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 12 4-4M7 13l-1 1a3 3 0 0 1-4-4l3-3a3 3 0 0 1 4 0m2 0 1-1a3 3 0 0 1 4 4l-3 3a3 3 0 0 1-4 0"/></svg></button>
@@ -39,19 +55,6 @@
             <div class="card-footer"><span id="characterCount">0 characters</span><button type="button" class="text-button" id="selectOutput">Select all</button></div>
           </section>
         </div>
-        <details class="options-panel" id="optionsPanel">
-          <summary>Options<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4"/></svg></summary>
-          <div class="options-content">
-            <div class="settings-grid">
-              <div class="setting"><label for="spacing">Spacing</label><select id="spacing"><option value="social">Social spacing</option><option value="roomy">Extra space between list items</option><option value="preserve">Keep my line breaks</option></select></div>
-              <div class="setting"><label for="font">Bold style</label><select id="font"><option value="sans">𝗦𝗮𝗻𝘀 + 𝟏𝟐𝟑</option><option value="serif">𝐒𝐞𝐫𝐢𝐟 + 𝟏𝟐𝟑</option></select></div>
-              <div class="setting"><label for="linkStyle">Links</label><select id="linkStyle"><option value="inline">Label + URL</option><option value="newline">URL on a new line</option><option value="label">Label only</option></select></div>
-              <div class="setting"><span class="setting-label">Output</span><div class="format-mode" role="group" aria-label="Output mode"><button type="button" class="mode-button active" id="unicodeMode" aria-pressed="true">Unicode</button><button type="button" class="mode-button" id="plainMode" aria-pressed="false">Plain text</button></div></div>
-            </div>
-            <div class="options-bottom"><label class="paste-setting"><input id="richPaste" type="checkbox" checked> Keep pasted formatting</label><span id="saveStatus">Saved on this device</span></div>
-            <div class="optional-actions"><button type="button" class="button button-outline" id="loadExample">Try an example</button><button type="button" class="button button-outline" id="downloadText">Save post as .txt</button><button type="button" class="button button-outline" id="saveTool">Download app</button></div>
-          </div>
-        </details>
         <div id="notice" class="notice" role="status" aria-live="polite"></div>
       </section>
     </main>

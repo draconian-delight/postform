@@ -38,23 +38,63 @@
 @media(max-width:750px){.masthead{height:66px}.platform-label{font-size:12px;padding:6px 8px}.page-heading{padding:12px 0 22px}.rich-editor{height:300px}.output-card textarea{height:320px}.format-button{width:44px;height:44px}}
 @media(max-width:380px){.output-heading h2{max-width:120px;line-height:1.35}.format-button{width:44px}.toolbar-divider{margin:0 4px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+/* Output styles stay visible; secondary controls expand above the draft. */
+.header-links{display:flex;align-items:center;gap:18px}
+.github-link{color:var(--primary);font-size:14px;font-weight:600;text-decoration:none;padding:8px 0}
+.github-link:hover{text-decoration:underline;text-underline-offset:3px}
+.workspace-controls{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;margin-bottom:18px}
+.output-mode-bar{grid-area:1/1;width:max-content;max-width:100%;position:relative;z-index:1}
+.output-mode-bar .format-mode{height:44px;min-width:226px}
+.workspace-controls .options-panel{grid-area:1/1;margin:0;border:0;padding:0;border-radius:0;background:transparent}
+.workspace-controls .options-panel>summary{display:flex;width:max-content;min-height:44px;margin-left:auto;padding:10px 5px}
+.workspace-controls .options-panel[open]>summary{min-height:44px}
+.workspace-controls .options-content{margin-top:14px;padding:20px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.workspace-controls .settings-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.rough-spacing-note{font-size:12px;line-height:1.5;color:var(--muted)}
+.draft-actions{display:flex;align-items:center;gap:14px}
+#restoreDraft[hidden],#capsText[hidden]{display:none}
+.editor-toolbar{height:auto;min-height:58px;flex-wrap:wrap;row-gap:5px}
+.caps-button{font-size:10px;font-weight:700;letter-spacing:.3px}
+.caps-button:disabled{color:#6b7588}
+.rich-editor.rough-active [data-postform-caps="true"]{text-decoration-line:underline;text-decoration-style:dotted;text-decoration-color:var(--primary);text-underline-offset:4px}
+.setting select:disabled{background:#edf0f7;color:var(--muted)}
+@media(max-width:750px){.output-mode-bar .format-mode{min-width:211px}.workspace-controls .options-content{padding:16px}.workspace-controls .settings-grid{grid-template-columns:1fr 1fr}.draft-actions{gap:10px}.draft-actions .text-button{font-size:12px}}
+@media(max-width:450px){.header-links .platform-label{display:none}.header-links{gap:0}.draft-actions{gap:7px}.output-mode-bar .format-mode{min-width:200px}.output-mode-bar .mode-button{font-size:12px;padding:5px 8px}}
+@media(max-width:380px){.output-mode-bar .format-mode{min-width:190px}.workspace-controls .settings-grid{grid-template-columns:1fr}.workspace-controls .options-panel>summary{font-size:13px;gap:5px}.draft-actions .text-button{font-size:11px}.draft-actions{gap:6px}}
 </style>
 </head>
 <body>
   <div class="app">
     <header class="masthead">
       <a class="brand" href="#" aria-label="Postform home"><span class="brand-mark" aria-hidden="true">P</span>Postform</a>
-      <span class="platform-label">LinkedIn &amp; X</span>
+      <div class="header-links"><span class="platform-label">LinkedIn &amp; X</span><a id="githubLink" class="github-link" href="https://github.com/draconian-delight/postform" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a></div>
     </header>
     <main>
       <div class="page-heading"><h1>Format your post</h1><p>Edit on the left. Copy from the right.</p></div>
       <section class="workspace" aria-label="Post formatter">
+        <div class="workspace-controls">
+          <div class="output-mode-bar"><div class="format-mode" role="group" aria-label="Output mode"><button type="button" class="mode-button active" id="unicodeMode" aria-pressed="true">Unicode</button><button type="button" class="mode-button" id="plainMode" aria-pressed="false">Plain</button><button type="button" class="mode-button" id="roughMode" aria-pressed="false">Rough</button></div></div>
+          <details class="options-panel" id="optionsPanel">
+            <summary>Options<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4"/></svg></summary>
+            <div class="options-content">
+              <div class="settings-grid">
+                <div class="setting"><label for="spacing">Spacing</label><select id="spacing"><option value="social">Social spacing</option><option value="roomy">Extra space between list items</option><option value="preserve">Keep my line breaks</option></select><span id="roughSpacingNote" class="rough-spacing-note" hidden>Rough uses sentence spacing.</span></div>
+                <div class="setting"><label for="font">Bold style</label><select id="font"><option value="sans">𝗦𝗮𝗻𝘀 + 𝟏𝟐𝟑</option><option value="serif">𝐒𝐞𝐫𝐢𝐟 + 𝟏𝟐𝟑</option></select></div>
+                <div class="setting"><label for="linkStyle">Links</label><select id="linkStyle"><option value="colon">Label: URL</option><option value="newline">URL on a new line</option></select></div>
+              </div>
+              <div class="options-bottom"><label class="paste-setting"><input id="richPaste" type="checkbox" checked> Keep pasted formatting</label><span id="saveStatus">Drafts saved on this device</span></div>
+              <div class="optional-actions"><button type="button" class="button button-outline" id="loadExample">Try an example</button><button type="button" class="button button-outline" id="downloadText">Save post as .txt</button><button type="button" class="button button-outline" id="saveTool">Download app</button></div>
+            </div>
+          </details>
+        </div>
         <div class="editors">
           <section class="editor-card source-card" aria-labelledby="draftLabel">
-            <div class="card-top"><h2 id="draftLabel">Your draft</h2><button type="button" class="text-button" id="clearDraft" aria-label="Clear draft">Clear</button></div>
+            <div class="card-top"><h2 id="draftLabel">Your draft</h2><div class="draft-actions"><button type="button" class="text-button" id="restoreDraft" hidden>Restore draft</button><button type="button" class="text-button" id="clearDraft" aria-label="Clear draft">Clear</button></div></div>
             <div class="editor-toolbar" role="group" aria-label="Text formatting">
               <button type="button" class="format-button" id="boldText" data-command="bold" title="Bold (Ctrl+B / ⌘B)" aria-label="Bold" aria-pressed="false"><strong>B</strong></button>
               <button type="button" class="format-button" id="italicText" data-command="italic" title="Italic (Ctrl+I / ⌘I)" aria-label="Italic" aria-pressed="false"><em>I</em></button>
+              <button type="button" class="format-button caps-button" id="capsText" title="Toggle uppercase emphasis in Rough output" aria-label="CAPS emphasis" aria-pressed="false" hidden disabled>CAPS</button>
               <span class="toolbar-divider" aria-hidden="true"></span>
               <button type="button" class="format-button" id="bulletList" data-command="insertUnorderedList" title="Bullet list" aria-label="Bullet list" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 5h8M8 10h8M8 15h8M3 5h1M3 10h1M3 15h1"/></svg></button>
               <button type="button" class="format-button" id="editLink" title="Add or edit link" aria-label="Add or edit link"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 12 4-4M7 13l-1 1a3 3 0 0 1-4-4l3-3a3 3 0 0 1 4 0m2 0 1-1a3 3 0 0 1 4 4l-3 3a3 3 0 0 1-4 0"/></svg></button>
@@ -70,19 +110,6 @@
             <div class="card-footer"><span id="characterCount">0 characters</span><button type="button" class="text-button" id="selectOutput">Select all</button></div>
           </section>
         </div>
-        <details class="options-panel" id="optionsPanel">
-          <summary>Options<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4"/></svg></summary>
-          <div class="options-content">
-            <div class="settings-grid">
-              <div class="setting"><label for="spacing">Spacing</label><select id="spacing"><option value="social">Social spacing</option><option value="roomy">Extra space between list items</option><option value="preserve">Keep my line breaks</option></select></div>
-              <div class="setting"><label for="font">Bold style</label><select id="font"><option value="sans">𝗦𝗮𝗻𝘀 + 𝟏𝟐𝟑</option><option value="serif">𝐒𝐞𝐫𝐢𝐟 + 𝟏𝟐𝟑</option></select></div>
-              <div class="setting"><label for="linkStyle">Links</label><select id="linkStyle"><option value="inline">Label + URL</option><option value="newline">URL on a new line</option><option value="label">Label only</option></select></div>
-              <div class="setting"><span class="setting-label">Output</span><div class="format-mode" role="group" aria-label="Output mode"><button type="button" class="mode-button active" id="unicodeMode" aria-pressed="true">Unicode</button><button type="button" class="mode-button" id="plainMode" aria-pressed="false">Plain text</button></div></div>
-            </div>
-            <div class="options-bottom"><label class="paste-setting"><input id="richPaste" type="checkbox" checked> Keep pasted formatting</label><span id="saveStatus">Saved on this device</span></div>
-            <div class="optional-actions"><button type="button" class="button button-outline" id="loadExample">Try an example</button><button type="button" class="button button-outline" id="downloadText">Save post as .txt</button><button type="button" class="button button-outline" id="saveTool">Download app</button></div>
-          </div>
-        </details>
         <div id="notice" class="notice" role="status" aria-live="polite"></div>
       </section>
     </main>
@@ -273,12 +300,18 @@
             var label = text.slice(labelStart + 1, labelEnd);
             var url = destination(text.slice(labelEnd + 2, urlEnd));
             var children = parseInline(label, options, depth + 1);
+            if (options.linkStyle === 'colon' && children.length) {
+              children[0].text = children[0].text.trimStart();
+              children[children.length - 1].text = children[children.length - 1].text.trimEnd();
+            }
             var readableLabel = children.map(function (part) { return part.text; }).join('');
             var suffix = '';
             if (url && options.linkStyle !== 'label') {
               if (!readableLabel.trim() || stripStyles(readableLabel.trim()) === url) {
                 children = [{ text: url, literal: true }];
-              } else suffix = options.linkStyle === 'newline' ? '\n' + url : ' (' + url + ')';
+              } else if (options.linkStyle === 'newline') suffix = '\n' + url;
+              else if (options.linkStyle === 'colon') suffix = (/[:：]$/.test(readableLabel.trim()) ? ' ' : ': ') + url;
+              else suffix = ' (' + url + ')';
             }
             tokens.push({ type: 'node', children: children, suffix: suffix, href: url });
             i = urlEnd + 1; continue;
@@ -291,7 +324,7 @@
       }
       var protectedEnd = protectedSpan(text, i);
       if (protectedEnd > i) {
-        addText(tokens, text.slice(i, protectedEnd), true); i = protectedEnd; continue;
+        addText(tokens, text.slice(i, protectedEnd).replace(/\\([!"#$%&'()*+,\-./:;<=>?@[\]\\^_`{|}~])/g, '$1'), true); i = protectedEnd; continue;
       }
       if (ch === '*' || ch === '_') {
         var runEnd = i + 1;
@@ -369,7 +402,7 @@
     options = options || {};
     return {
       spacing: ['preserve', 'social', 'roomy'].indexOf(options.spacing) >= 0 ? options.spacing : 'social',
-      linkStyle: ['inline', 'newline', 'label'].indexOf(options.linkStyle) >= 0 ? options.linkStyle : 'inline',
+      linkStyle: ['colon', 'inline', 'newline', 'label'].indexOf(options.linkStyle) >= 0 ? options.linkStyle : 'colon',
       font: options.font === 'serif' ? 'serif' : 'sans',
       plain: !!options.plain, bold: options.bold !== false, italic: options.italic !== false
     };
@@ -445,6 +478,110 @@
     });
   }
 
+  var ROUGH_TECH_TERMS = new Set(('AI MLX GPU CPU TPU NPU VRAM RAM ROM SSD HDD USB TCP UDP HTTP HTTPS URL URI HTML CSS XML JSON YAML SQL CSV TSV UTF ASCII CLI GUI SDK API APIs SDKs LLM LLMs IDE JVM JDK JRE WASM SIMD AVX CUDA ROCm OpenCL LLVM ONNX NLP ANN HNSW IVF MMR BM25 FP32 FP16 BF16 INT8 INT4 RAG GPT US UK EU U.S U.K U.N').toLowerCase().split(/\s+/));
+  var ROUGH_UNITS = new Set(('B bit bits byte bytes KB MB GB TB PB EB KiB MiB GiB TiB PiB EiB bps kbps Mbps Gbps Hz kHz MHz GHz THz ns us µs μs ms s sec min h K °C °F V mV A mA W mW kW J mJ kJ m cm mm km g kg mg mol Pa kPa MPa').toLowerCase().split(/\s+/));
+  var ROUGH_ABBREVIATIONS = new Set(('dr mr mrs ms prof sr jr st mt capt gen lt col sgt rev hon pres gov sen rep supt det vs etc fig figs eq eqs no nos vol vols p pp dept approx incl misc jan feb mar apr jun jul aug sep sept oct nov dec inc ltd co corp e.g i.e a.m p.m u.s u.k u.n ph.d m.d b.sc m.sc').split(/\s+/));
+
+  function roughProtectedSpan(text, start) {
+    var end = protectedSpan(text, start);
+    if (end > start) return end;
+    if (start && isWord(previousCharacter(text, start))) return start;
+    // Visible link labels can contain a domain without an https:// prefix.
+    var domain = /^(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}(?::\d{1,5})?(?:[/?#][^\s<>`]+)?/.exec(text.slice(start));
+    if (!domain) return start;
+    var value = domain[0].replace(/[.,!?:;*_]+$/, '');
+    [['(', ')'], ['[', ']'], ['{', '}']].forEach(function (pair) {
+      var opens = value.split(pair[0]).length - 1, closes = value.split(pair[1]).length - 1;
+      while (closes > opens && value.endsWith(pair[1])) { value = value.slice(0, -1); closes--; }
+    });
+    return start + value.length;
+  }
+
+  // Transform prose across styled DOM text-node boundaries, then return the
+  // pieces to their original runs. The caller can update a clone of the editor
+  // without changing the draft, metadata, or the number of text nodes.
+  function transformRoughRuns(runs, settings) {
+    if (!Array.isArray(runs)) return [];
+    var source = runs.map(function (run) { return String(run && run.text != null ? run.text : ''); });
+    var result = runs.map(function (run) { return Object.assign({}, run, { text: '' }); });
+    var text = source.join('');
+    if (!text) return result;
+    var owner = new Int32Array(text.length), protectedMask = new Uint8Array(text.length);
+    var atomicMask = new Uint8Array(text.length), technicalMask = new Uint8Array(text.length);
+    var offset = 0;
+    runs.forEach(function (run, index) {
+      var end = offset + source[index].length;
+      owner.fill(index, offset, end);
+      if (run && run.literal) protectedMask.fill(1, offset, end);
+      if (run && run.atomic) atomicMask.fill(1, offset, end);
+      offset = end;
+    });
+    for (var cursor = 0; cursor < text.length;) {
+      if (protectedMask[cursor]) { cursor++; continue; }
+      var protectedEnd = roughProtectedSpan(text, cursor);
+      if (protectedEnd > cursor) { protectedMask.fill(1, cursor, protectedEnd); cursor = protectedEnd; }
+      else cursor += String.fromCodePoint(text.codePointAt(cursor)).length;
+    }
+    var words = /[\p{L}\p{N}]+(?:[-._/+][\p{L}\p{N}]+)*/gu, word;
+    while ((word = words.exec(text))) {
+      var readable = stripStyles(word[0]);
+      if (ROUGH_TECH_TERMS.has(readable.toLowerCase()) || ROUGH_UNITS.has(readable.toLowerCase()) && readable.length > 1 && !/^(?:bits?|bytes?|sec|min|mol)$/i.test(readable) ||
+          /[a-z][A-Z]/.test(readable) || /\p{L}/u.test(readable) && /\p{N}/u.test(readable)) {
+        technicalMask.fill(1, word.index, word.index + word[0].length);
+      }
+    }
+    var quantity = /[\p{N}]+(?:\.[\p{N}]+)?[ \t\u00a0]+([A-Za-zµμ°]+(?:\/[A-Za-zµμ°]+)?)/gu, unit;
+    while ((unit = quantity.exec(text))) {
+      if (ROUGH_UNITS.has(unit[1].toLowerCase())) {
+        var unitStart = unit.index + unit[0].length - unit[1].length;
+        technicalMask.fill(1, unitStart, unit.index + unit[0].length);
+      }
+    }
+
+    var spaces = [];
+    if (!settings || settings.sentenceSpacing !== false) {
+      for (var at = 0; at < text.length;) {
+        var punctuation = text[at];
+        if (!/[.!?。！？]/.test(punctuation) || protectedMask[at] || atomicMask[at]) { at++; continue; }
+        var punctuationEnd = at + 1;
+        while (punctuationEnd < text.length && /[.!?。！？]/.test(text[punctuationEnd]) && !protectedMask[punctuationEnd] && !atomicMask[punctuationEnd]) punctuationEnd++;
+        var closeEnd = punctuationEnd;
+        while (closeEnd < text.length && /["'’”»）)\]}]/.test(text[closeEnd]) && !protectedMask[closeEnd]) closeEnd++;
+        var gapEnd = closeEnd;
+        while (gapEnd < text.length && /\s/u.test(text[gapEnd]) && !protectedMask[gapEnd] && !atomicMask[gapEnd]) gapEnd++;
+        var next = text[gapEnd] || '';
+        var hasGap = gapEnd > closeEnd;
+        var validBreak = !!next && (hasGap || /[!?。！？]/.test(punctuation) || /[A-Z\u3400-\u9fff]/.test(next));
+        if (punctuation === '.' && punctuationEnd === at + 1) {
+          if (/\d/.test(text[at - 1] || '') && /\d/.test(text[at + 1] || '')) validBreak = false;
+          var abbreviation = /([A-Za-z][A-Za-z.]*)\.$/.exec(text.slice(0, punctuationEnd));
+          if (abbreviation && ROUGH_ABBREVIATIONS.has(abbreviation[1].toLowerCase())) validBreak = false;
+          if (abbreviation && /^[A-Z]$/.test(abbreviation[1]) && /^[A-Z]/.test(next)) validBreak = false;
+        }
+        if (validBreak && !/[.!?。！？]/.test(next) && !protectedMask[closeEnd] && !atomicMask[closeEnd]) spaces.push({ start: closeEnd, end: gapEnd });
+        at = Math.max(punctuationEnd, gapEnd);
+      }
+    }
+    var operation = 0;
+    for (var index = 0; index < text.length;) {
+      var spacing = spaces[operation];
+      if (spacing && spacing.start === index) {
+        result[owner[index]].text += '\n\n';
+        index = spacing.end; operation++;
+        if (index >= text.length) break;
+      }
+      var ch = String.fromCodePoint(text.codePointAt(index));
+      var runIndex = owner[index];
+      if (protectedMask[index]) result[runIndex].text += ch;
+      else {
+        var plain = stripStyles(ch);
+        result[runIndex].text += runs[runIndex] && runs[runIndex].caps ? plain.toUpperCase() : technicalMask[index] ? plain : plain.toLowerCase();
+      }
+      index += ch.length;
+    }
+    return result;
+  }
+
   // Reuse the emphasis parser for the visual editor; imported HTML is escaped
   // here rather than trusting markup supplied by the clipboard or local storage.
   function toEditorHtml(value) {
@@ -510,7 +647,7 @@
     return output.join('');
   }
 
-  return Object.freeze({ format: format, stylize: stylize, stripStyles: stripStyles, toEditorHtml: toEditorHtml,
+  return Object.freeze({ format: format, stylize: stylize, stripStyles: stripStyles, toEditorHtml: toEditorHtml, transformRoughRuns: transformRoughRuns,
     countCodePoints: function (value) { return Array.from(String(value == null ? '' : value)).length; } });
 });
 </script>
@@ -519,7 +656,8 @@
   const $ = (id) => document.getElementById(id);
   const source = $('source');
   const output = $('output');
-  const storageKey = 'postform.draft.v2';
+  const draftKey = 'postform.draft.v3';
+  const preferencesKey = 'postform.preferences.v1';
   const example = `A small update with **35 big possibilities**.
 
 Keep your **bold text and numbers**, add a little *emphasis*, and give each idea some room.
@@ -527,29 +665,72 @@ Keep your **bold text and numbers**, add a little *emphasis*, and give each idea
 - Write something useful.
 - Make it easy to read.
 - Share it with your people.`;
-  let plain = false;
+  let mode = 'unicode';
   let saveTimer;
   let noticeTimer;
   let copyTimer;
   let revision = 0;
   let editorRange = null;
-  let savedDraft = null;
-  try { savedDraft = JSON.parse(localStorage.getItem(storageKey) || localStorage.getItem('postform.draft.v1')); } catch (_) { /* Storage can be unavailable for local files. */ }
-  if (savedDraft && (typeof savedDraft.text === 'string' || typeof savedDraft.html === 'string')) {
-    // Rebuild saved HTML through the safe renderer before placing it in the editor.
-    source.innerHTML = PostFormatter.toEditorHtml(typeof savedDraft.html === 'string' ? richTextToMarkdown(savedDraft.html).markdown : savedDraft.text);
-    for (const key of ['spacing', 'font', 'linkStyle']) {
-      if (Array.from($(key).options).some(option => option.value === savedDraft[key])) $(key).value = savedDraft[key];
-    }
-    plain = savedDraft.plain === true;
-    $('richPaste').checked = savedDraft.richPaste !== false;
-  } else source.innerHTML = '';
+  let draftDirty = false;
+  let applyingCaps = false;
+  let storageAvailable = true;
+  function readSaved(key) {
+    try { return JSON.parse(localStorage.getItem(key)); } catch (_) { storageAvailable = false; return null; }
+  }
+  const legacyDraft = readSaved('postform.draft.v2') || readSaved('postform.draft.v1');
+  function cleanSavedDraft(value) {
+    if (!value || (typeof value.html !== 'string' && typeof value.text !== 'string')) return null;
+    const html = sanitizeEditorHtml(typeof value.html === 'string' ? value.html : PostFormatter.toEditorHtml(value.text));
+    const container = document.createElement('div'); container.innerHTML = html;
+    return container.textContent.trim() ? { version: 3, html, text: richTextToMarkdown(html).markdown } : null;
+  }
+  let savedDraft = cleanSavedDraft(readSaved(draftKey));
+  const migratedDraft = savedDraft ? null : cleanSavedDraft(legacyDraft);
+  if (migratedDraft) {
+    savedDraft = migratedDraft;
+    try { localStorage.setItem(draftKey, JSON.stringify(savedDraft)); } catch (_) { storageAvailable = false; }
+  }
+  const preferences = readSaved(preferencesKey) || legacyDraft || {};
+  for (const key of ['spacing', 'font']) {
+    if (Array.from($(key).options).some(option => option.value === preferences[key])) $(key).value = preferences[key];
+  }
+  $('linkStyle').value = preferences.linkStyle === 'newline' ? 'newline' : 'colon';
+  mode = ['unicode', 'plain', 'rough'].includes(preferences.mode) ? preferences.mode : preferences.plain === true ? 'plain' : 'unicode';
+  $('richPaste').checked = preferences.richPaste !== false;
+  source.innerHTML = '';
 
-  function draftMarkdown() { return richTextToMarkdown(source.innerHTML).markdown; }
-  function snapshot() { return { version: 2, html: source.innerHTML, text: draftMarkdown(), ...options(), richPaste: $('richPaste').checked }; }
+  function roughDraftHtml() {
+    const clone = source.cloneNode(true);
+    const walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {
+      acceptNode: node => node.nodeType === Node.TEXT_NODE || node.tagName === 'BR' ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
+    });
+    const groups = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      const block = node.parentElement.closest('p,div,li,pre,blockquote,h1,h2,h3,h4,h5,h6') || clone;
+      let group = groups[groups.length - 1];
+      if (!group || group.block !== block) { group = { block, nodes: [] }; groups.push(group); }
+      group.nodes.push(node);
+    }
+    for (const group of groups) {
+      const runs = group.nodes.map(textNode => ({
+        text: textNode.nodeType === Node.TEXT_NODE ? textNode.nodeValue : '\n',
+        caps: textNode.parentElement.closest('[data-postform-caps="true"]') !== null,
+        literal: textNode.parentElement.closest('code,pre') !== null,
+        atomic: textNode.parentElement.closest('a') !== null
+      }));
+      const transformed = PostFormatter.transformRoughRuns(runs, { sentenceSpacing: !group.block.closest('li,pre') });
+      transformed.forEach((run, index) => {
+        if (group.nodes[index].nodeType === Node.TEXT_NODE) group.nodes[index].nodeValue = run.text;
+      });
+    }
+    return clone.innerHTML;
+  }
+  function draftMarkdown(rough = false) { return richTextToMarkdown(rough ? roughDraftHtml() : source.innerHTML).markdown; }
+  function snapshot() { return { version: 3, html: sanitizeEditorHtml(source.innerHTML), text: draftMarkdown() }; }
 
   function options() {
-    return { spacing: $('spacing').value, font: $('font').value, linkStyle: $('linkStyle').value, plain };
+    return { spacing: $('spacing').value, font: $('font').value, linkStyle: $('linkStyle').value, mode, plain: mode === 'plain' };
   }
   function notice(message, isError = false, persistent = false) {
     clearTimeout(noticeTimer);
@@ -557,45 +738,69 @@ Keep your **bold text and numbers**, add a little *emphasis*, and give each idea
     $('notice').classList.toggle('error', isError);
     if (!persistent) noticeTimer = setTimeout(() => { $('notice').textContent = ''; }, 6500);
   }
-  function save() {
+  function updateRestore() {
+    $('restoreDraft').hidden = !savedDraft || !!source.textContent.trim();
+  }
+  function savePreferences() {
+    try { localStorage.setItem(preferencesKey, JSON.stringify({ ...options(), richPaste: $('richPaste').checked })); }
+    catch (_) { storageAvailable = false; }
+    if (!storageAvailable) $('saveStatus').textContent = 'Draft kept in this tab';
+  }
+  function flushDraft() {
+    clearTimeout(saveTimer);
+    if (!draftDirty) return;
+    const current = source.textContent.trim() ? snapshot() : null;
+    savedDraft = current;
+    try {
+      if (current) localStorage.setItem(draftKey, JSON.stringify(current));
+      else {
+        localStorage.removeItem(draftKey);
+        localStorage.removeItem('postform.draft.v2');
+        localStorage.removeItem('postform.draft.v1');
+      }
+      $('saveStatus').textContent = current ? 'Draft saved on this device' : 'Draft cleared';
+    } catch (_) { storageAvailable = false; $('saveStatus').textContent = 'Draft kept in this tab'; }
+    updateRestore();
+  }
+  function saveDraft() {
+    draftDirty = true;
     clearTimeout(saveTimer);
     $('saveStatus').textContent = 'Saving…';
-    saveTimer = setTimeout(() => {
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(snapshot()));
-        $('saveStatus').textContent = 'Saved on this device';
-      } catch (_) { $('saveStatus').textContent = 'Draft kept in this tab'; }
-    }, 250);
+    saveTimer = setTimeout(flushDraft, 250);
   }
-  function render(persist = true) {
+  function render(persist = true, draftChanged = false) {
     revision++;
     if (persist) { clearTimeout(noticeTimer); $('notice').textContent = ''; }
     clearTimeout(copyTimer);
     $('copyLabel').textContent = 'Copy post';
-    output.value = PostFormatter.format(draftMarkdown(), options());
+    output.value = PostFormatter.format(draftMarkdown(mode === 'rough'), { ...options(), spacing: mode === 'rough' ? 'roomy' : $('spacing').value });
     source.classList.toggle('is-empty', !source.textContent.trim());
+    source.classList.toggle('rough-active', mode === 'rough');
     const count = PostFormatter.countCodePoints(output.value);
     $('characterCount').textContent = count.toLocaleString() + ' character' + (count === 1 ? '' : 's');
     $('copyPost').disabled = !output.value.trim();
     $('downloadText').disabled = !output.value.trim();
     $('selectOutput').disabled = !output.value;
-    $('unicodeMode').classList.toggle('active', !plain);
-    $('plainMode').classList.toggle('active', plain);
-    $('unicodeMode').setAttribute('aria-pressed', String(!plain));
-    $('plainMode').setAttribute('aria-pressed', String(plain));
-    $('font').disabled = plain;
-    $('outputDescription').textContent = plain ? 'Plain text preview' : 'Unicode preview';
+    for (const name of ['unicode', 'plain', 'rough']) {
+      $(name + 'Mode').classList.toggle('active', mode === name);
+      $(name + 'Mode').setAttribute('aria-pressed', String(mode === name));
+    }
+    $('font').disabled = mode === 'plain';
+    $('spacing').disabled = mode === 'rough';
+    $('roughSpacingNote').hidden = mode !== 'rough';
+    $('capsText').hidden = mode !== 'rough';
+    $('outputDescription').textContent = mode === 'plain' ? 'Plain text preview' : mode === 'rough' ? 'Rough preview · sentence spacing' : 'Unicode preview';
+    updateRestore();
     updateToolbar();
-    if (persist) save();
+    if (persist) savePreferences();
+    if (draftChanged) saveDraft();
   }
-  source.addEventListener('input', () => render());
+  source.addEventListener('input', () => { if (!applyingCaps) render(true, true); });
   for (const key of ['spacing', 'font', 'linkStyle']) $(key).addEventListener('change', () => {
     render();
-    if (key === 'linkStyle' && $('linkStyle').value === 'label') notice('Label only: link destinations are left out of the post.');
   });
-  $('richPaste').addEventListener('change', save);
-  $('unicodeMode').addEventListener('click', () => { plain = false; render(); });
-  $('plainMode').addEventListener('click', () => { plain = true; render(); });
+  $('richPaste').addEventListener('change', savePreferences);
+  for (const name of ['unicode', 'plain', 'rough']) $(name + 'Mode').addEventListener('click', () => { mode = name; render(); });
   // Preserve the native undo stack for paste, formatting, and replacing a draft.
   function rememberSelection() {
     const selection = window.getSelection();
@@ -633,16 +838,146 @@ Keep your **bold text and numbers**, add a little *emphasis*, and give each idea
       range.insertNode(fragment);
       if (last) { range.setStartAfter(last); range.collapse(true); selection.removeAllRanges(); selection.addRange(range); }
     }
-    rememberSelection(); render();
+    rememberSelection(); render(true, true);
   }
   function replaceDraft(text) {
     const range = document.createRange(); range.selectNodeContents(source); editorRange = range;
     insertEditorHtml(PostFormatter.toEditorHtml(text));
-    if (!text) { source.innerHTML = ''; editorRange = null; render(); }
+    if (!text) { source.innerHTML = ''; editorRange = null; render(true, true); }
   }
-  $('clearDraft').addEventListener('click', () => { replaceDraft(''); notice('Draft cleared.'); });
+  $('clearDraft').addEventListener('click', () => { replaceDraft(''); flushDraft(); notice('Draft and saved backup cleared.'); });
+  $('restoreDraft').addEventListener('click', () => {
+    if (!savedDraft || source.textContent.trim()) return;
+    const range = document.createRange(); range.selectNodeContents(source); editorRange = range;
+    insertEditorHtml(sanitizeEditorHtml(savedDraft.html)); flushDraft(); notice('Previous draft restored.');
+  });
   $('loadExample').addEventListener('click', () => { replaceDraft(example); });
   $('selectOutput').addEventListener('click', () => { output.focus(); output.select(); });
+
+  function selectedTextNodes(range) {
+    const walker = document.createTreeWalker(source, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      if (!node.nodeValue || !range.intersectsNode(node)) continue;
+      const start = range.startContainer === node ? range.startOffset : 0;
+      const end = range.endContainer === node ? range.endOffset : node.length;
+      if (end > start && node.nodeValue.slice(start, end).trim()) nodes.push(node);
+    }
+    return nodes;
+  }
+  function restoreTextSelection(start, end) {
+    const walker = document.createTreeWalker(source, NodeFilter.SHOW_TEXT);
+    const range = document.createRange();
+    let offset = 0, started = false, node;
+    while ((node = walker.nextNode())) {
+      if (!started && start <= offset + node.length) { range.setStart(node, Math.max(0, start - offset)); started = true; }
+      if (started && end <= offset + node.length) {
+        range.setEnd(node, Math.max(0, end - offset));
+        const selection = getSelection(); selection.removeAllRanges(); selection.addRange(range); rememberSelection(); return;
+      }
+      offset += node.length;
+    }
+  }
+  function selectionBlock(node) {
+    let element = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
+    return element?.closest('p,div,li,pre,blockquote,h1,h2,h3,h4,h5,h6');
+  }
+  $('capsText').addEventListener('click', () => {
+    if (mode !== 'rough') return;
+    restoreSelection();
+    const selected = getSelection().getRangeAt(0).cloneRange();
+    const nodes = selectedTextNodes(selected);
+    if (!nodes.length) return;
+    const mark = !nodes.every(node => node.parentElement.closest('[data-postform-caps="true"]'));
+    const sourcePrefix = document.createRange(); sourcePrefix.selectNodeContents(source);
+    sourcePrefix.setEnd(selected.startContainer, selected.startOffset);
+    const globalStart = sourcePrefix.toString().length;
+    const globalEnd = globalStart + selected.toString().length;
+    const expanded = selected.cloneRange();
+    const first = selectionBlock(selected.startContainer), last = selectionBlock(selected.endContainer);
+    // Include surrounding inline content so insertHTML cannot inherit a CAPS
+    // wrapper we are removing, and retain inherited bold/italic ancestors.
+    if (first && first !== source) expanded.setStart(first, 0);
+    if (last && last !== source) expanded.setEnd(last, last.childNodes.length);
+    const prefix = expanded.cloneRange(); prefix.setEnd(selected.startContainer, selected.startOffset);
+    const selectedStart = prefix.toString().length;
+    const selectedEnd = selectedStart + selected.toString().length;
+    const fragment = expanded.cloneContents();
+    const oldMarkers = Array.from(fragment.querySelectorAll('[data-postform-caps]'));
+    const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_TEXT);
+    const leaves = [];
+    let node, offset = 0;
+    while ((node = walker.nextNode())) {
+      leaves.push({ node, start: offset, end: offset + node.length, caps: !!node.parentElement?.closest('[data-postform-caps="true"]') });
+      offset += node.length;
+    }
+    for (const leaf of leaves) {
+      const text = leaf.node.nodeValue;
+      const cuts = [0, Math.max(0, Math.min(text.length, selectedStart - leaf.start)), Math.max(0, Math.min(text.length, selectedEnd - leaf.start)), text.length].sort((a, b) => a - b);
+      const replacement = document.createDocumentFragment();
+      for (let index = 1; index < cuts.length; index++) {
+        const from = cuts[index - 1], to = cuts[index];
+        if (to <= from) continue;
+        const inSelection = leaf.start + from >= selectedStart && leaf.start + to <= selectedEnd;
+        const caps = inSelection ? mark : leaf.caps;
+        const part = document.createTextNode(text.slice(from, to));
+        if (caps) {
+          const span = document.createElement('span'); span.dataset.postformCaps = 'true'; span.appendChild(part); replacement.appendChild(span);
+        } else replacement.appendChild(part);
+      }
+      leaf.node.replaceWith(replacement);
+    }
+    // Only unwrap the old markers; new per-leaf markers preserve the selection
+    // without wrapping paragraphs or changing bold/italic ancestors.
+    for (const marker of oldMarkers) marker.replaceWith(...marker.childNodes);
+    const container = document.createElement('div'); container.appendChild(fragment);
+    editorRange = expanded;
+    // Chrome serializes a live text decoration into inline styles during
+    // insertHTML. Hide the annotation cue until the native undoable edit ends.
+    applyingCaps = true;
+    source.classList.remove('rough-active');
+    try {
+      restoreSelection();
+      document.execCommand('insertHTML', false, container.innerHTML);
+    } finally {
+      applyingCaps = false;
+      source.classList.toggle('rough-active', mode === 'rough');
+    }
+    restoreTextSelection(globalStart, globalEnd); render(true, true);
+  });
+
+  function sanitizeEditorHtml(html) {
+    const template = document.createElement('template'); template.innerHTML = html;
+    const rejected = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'OBJECT', 'SVG', 'MATH', 'HEAD', 'META', 'LINK', 'TEMPLATE']);
+    const allowed = new Set(['P', 'DIV', 'BR', 'B', 'STRONG', 'I', 'EM', 'SPAN', 'A', 'UL', 'OL', 'LI', 'CODE', 'PRE', 'BLOCKQUOTE']);
+    function clean(node) {
+      if (node.nodeType === Node.TEXT_NODE) return document.createTextNode(node.nodeValue);
+      if (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) return document.createDocumentFragment();
+      if (rejected.has(node.tagName) || node.hasAttribute?.('hidden')) return document.createDocumentFragment();
+      if (node.tagName === 'IMG') return document.createTextNode(node.getAttribute('alt') || '');
+      const heading = /^H[1-6]$/.test(node.tagName || '');
+      const element = allowed.has(node.tagName) ? document.createElement(node.tagName.toLowerCase()) : heading ? document.createElement('p') : document.createDocumentFragment();
+      if (element.nodeType === Node.ELEMENT_NODE) {
+        if (node.tagName === 'A') {
+          const href = node.getAttribute('href') || '';
+          if (/^(https?:\/\/|mailto:)/i.test(href)) element.setAttribute('href', href);
+        }
+        if (node.tagName === 'OL' || node.tagName === 'LI') {
+          const attr = node.tagName === 'OL' ? 'start' : 'value';
+          if (/^-?\d{1,9}$/.test(node.getAttribute(attr) || '')) element.setAttribute(attr, node.getAttribute(attr));
+        }
+        if (node.tagName === 'SPAN' && node.getAttribute('data-postform-caps') === 'true') element.setAttribute('data-postform-caps', 'true');
+        if (heading) element.style.fontWeight = 'bold';
+        if (/^(normal|bold|bolder|[1-9]00)$/.test(node.style.fontWeight)) element.style.fontWeight = node.style.fontWeight;
+        if (/^(normal|italic|oblique)$/.test(node.style.fontStyle)) element.style.fontStyle = node.style.fontStyle;
+      }
+      for (const child of node.childNodes) element.appendChild(clean(child));
+      return element;
+    }
+    const container = document.createElement('div'); container.appendChild(clean(template.content));
+    return container.innerHTML;
+  }
 
   function updateToolbar() {
     const selection = window.getSelection();
@@ -652,17 +987,20 @@ Keep your **bold text and numbers**, add a little *emphasis*, and give each idea
       try { active = !!inside && document.queryCommandState(command); } catch (_) { /* Browser may not report state. */ }
       $(id).setAttribute('aria-pressed', String(active));
     }
+    const capsNodes = inside && !selection.isCollapsed ? selectedTextNodes(selection.getRangeAt(0)) : [];
+    $('capsText').disabled = !capsNodes.length;
+    $('capsText').setAttribute('aria-pressed', String(capsNodes.length > 0 && capsNodes.every(node => node.parentElement.closest('[data-postform-caps="true"]'))));
   }
   document.addEventListener('selectionchange', () => { rememberSelection(); updateToolbar(); });
   for (const button of document.querySelectorAll('.format-button')) {
     button.addEventListener('mousedown', event => event.preventDefault());
     if (button.dataset.command) button.addEventListener('click', () => {
-      restoreSelection(); document.execCommand(button.dataset.command, false, null); rememberSelection(); render();
+      restoreSelection(); document.execCommand(button.dataset.command, false, null); rememberSelection(); render(true, true);
     });
   }
   source.addEventListener('keydown', event => {
     if ((event.ctrlKey || event.metaKey) && ['b', 'i'].includes(event.key.toLowerCase())) {
-      event.preventDefault(); document.execCommand(event.key.toLowerCase() === 'b' ? 'bold' : 'italic', false, null); rememberSelection(); render();
+      event.preventDefault(); document.execCommand(event.key.toLowerCase() === 'b' ? 'bold' : 'italic', false, null); rememberSelection(); render(true, true);
     }
   });
   const linkDialog = $('linkDialog');
@@ -689,7 +1027,7 @@ Keep your **bold text and numbers**, add a little *emphasis*, and give each idea
   });
   $('cancelLink').addEventListener('click', () => { linkDialog.close(); restoreSelection(); });
   $('removeLink').addEventListener('click', () => {
-    linkDialog.close(); restoreSelection(); document.execCommand('unlink', false, null); rememberSelection(); render();
+    linkDialog.close(); restoreSelection(); document.execCommand('unlink', false, null); rememberSelection(); render(true, true);
   });
   $('linkForm').addEventListener('submit', event => {
     event.preventDefault();
@@ -700,7 +1038,7 @@ Keep your **bold text and numbers**, add a little *emphasis*, and give each idea
     const label = $('linkText').value;
     linkDialog.close(); restoreSelection();
     if (editorRange && !editorRange.collapsed && editorRange.toString() === label) {
-      document.execCommand('createLink', false, url); rememberSelection(); render();
+      document.execCommand('createLink', false, url); rememberSelection(); render(true, true);
     } else {
       const anchor = document.createElement('a'); anchor.setAttribute('href', url); anchor.textContent = label;
       insertEditorHtml(anchor.outerHTML);
@@ -755,6 +1093,7 @@ Keep your **bold text and numbers**, add a little *emphasis*, and give each idea
     clean.querySelector('#source').textContent = '';
     clean.querySelector('#output').textContent = '';
     clean.querySelector('#notice').textContent = '';
+    clean.querySelector('#optionsPanel').removeAttribute('open');
     for (const select of clean.querySelectorAll('select')) for (const option of select.options) option.removeAttribute('selected');
     download('<!doctype html>\n' + clean.outerHTML, 'Postform.html', 'text/html;charset=utf-8');
     notice('App downloaded. Open Postform.html to use it offline.');
@@ -900,11 +1239,11 @@ Keep your **bold text and numbers**, add a little *emphasis*, and give each idea
   });
 
   // Exposed for deterministic browser checks; no draft is sent anywhere.
-  window.PostformApp = { richTextToMarkdown, draftMarkdown };
+  window.PostformApp = { richTextToMarkdown, draftMarkdown, sanitizeEditorHtml };
+  $('saveStatus').textContent = storageAvailable ? savedDraft ? 'Previous draft available' : 'Drafts saved on this device' : 'Draft kept in this tab';
   render(false);
-  save();
   window.addEventListener('pagehide', () => {
-    try { localStorage.setItem(storageKey, JSON.stringify(snapshot())); } catch (_) { /* Optional persistence. */ }
+    savePreferences(); flushDraft();
   });
 }());
 </script>

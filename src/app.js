@@ -3,7 +3,8 @@
   const $ = (id) => document.getElementById(id);
   const source = $('source');
   const output = $('output');
-  const storageKey = 'postform.draft.v2';
+  const draftKey = 'postform.draft.v3';
+  const preferencesKey = 'postform.preferences.v1';
   const example = `A small update with **35 big possibilities**.
 
 Keep your **bold text and numbers**, add a little *emphasis*, and give each idea some room.
@@ -11,29 +12,72 @@ Keep your **bold text and numbers**, add a little *emphasis*, and give each idea
 - Write something useful.
 - Make it easy to read.
 - Share it with your people.`;
-  let plain = false;
+  let mode = 'unicode';
   let saveTimer;
   let noticeTimer;
   let copyTimer;
   let revision = 0;
   let editorRange = null;
-  let savedDraft = null;
-  try { savedDraft = JSON.parse(localStorage.getItem(storageKey) || localStorage.getItem('postform.draft.v1')); } catch (_) { /* Storage can be unavailable for local files. */ }
-  if (savedDraft && (typeof savedDraft.text === 'string' || typeof savedDraft.html === 'string')) {
-    // Rebuild saved HTML through the safe renderer before placing it in the editor.
-    source.innerHTML = PostFormatter.toEditorHtml(typeof savedDraft.html === 'string' ? richTextToMarkdown(savedDraft.html).markdown : savedDraft.text);
-    for (const key of ['spacing', 'font', 'linkStyle']) {
-      if (Array.from($(key).options).some(option => option.value === savedDraft[key])) $(key).value = savedDraft[key];
-    }
-    plain = savedDraft.plain === true;
-    $('richPaste').checked = savedDraft.richPaste !== false;
-  } else source.innerHTML = '';
+  let draftDirty = false;
+  let applyingCaps = false;
+  let storageAvailable = true;
+  function readSaved(key) {
+    try { return JSON.parse(localStorage.getItem(key)); } catch (_) { storageAvailable = false; return null; }
+  }
+  const legacyDraft = readSaved('postform.draft.v2') || readSaved('postform.draft.v1');
+  function cleanSavedDraft(value) {
+    if (!value || (typeof value.html !== 'string' && typeof value.text !== 'string')) return null;
+    const html = sanitizeEditorHtml(typeof value.html === 'string' ? value.html : PostFormatter.toEditorHtml(value.text));
+    const container = document.createElement('div'); container.innerHTML = html;
+    return container.textContent.trim() ? { version: 3, html, text: richTextToMarkdown(html).markdown } : null;
+  }
+  let savedDraft = cleanSavedDraft(readSaved(draftKey));
+  const migratedDraft = savedDraft ? null : cleanSavedDraft(legacyDraft);
+  if (migratedDraft) {
+    savedDraft = migratedDraft;
+    try { localStorage.setItem(draftKey, JSON.stringify(savedDraft)); } catch (_) { storageAvailable = false; }
+  }
+  const preferences = readSaved(preferencesKey) || legacyDraft || {};
+  for (const key of ['spacing', 'font']) {
+    if (Array.from($(key).options).some(option => option.value === preferences[key])) $(key).value = preferences[key];
+  }
+  $('linkStyle').value = preferences.linkStyle === 'newline' ? 'newline' : 'colon';
+  mode = ['unicode', 'plain', 'rough'].includes(preferences.mode) ? preferences.mode : preferences.plain === true ? 'plain' : 'unicode';
+  $('richPaste').checked = preferences.richPaste !== false;
+  source.innerHTML = '';
 
-  function draftMarkdown() { return richTextToMarkdown(source.innerHTML).markdown; }
-  function snapshot() { return { version: 2, html: source.innerHTML, text: draftMarkdown(), ...options(), richPaste: $('richPaste').checked }; }
+  function roughDraftHtml() {
+    const clone = source.cloneNode(true);
+    const walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {
+      acceptNode: node => node.nodeType === Node.TEXT_NODE || node.tagName === 'BR' ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
+    });
+    const groups = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      const block = node.parentElement.closest('p,div,li,pre,blockquote,h1,h2,h3,h4,h5,h6') || clone;
+      let group = groups[groups.length - 1];
+      if (!group || group.block !== block) { group = { block, nodes: [] }; groups.push(group); }
+      group.nodes.push(node);
+    }
+    for (const group of groups) {
+      const runs = group.nodes.map(textNode => ({
+        text: textNode.nodeType === Node.TEXT_NODE ? textNode.nodeValue : '\n',
+        caps: textNode.parentElement.closest('[data-postform-caps="true"]') !== null,
+        literal: textNode.parentElement.closest('code,pre') !== null,
+        atomic: textNode.parentElement.closest('a') !== null
+      }));
+      const transformed = PostFormatter.transformRoughRuns(runs, { sentenceSpacing: !group.block.closest('li,pre') });
+      transformed.forEach((run, index) => {
+        if (group.nodes[index].nodeType === Node.TEXT_NODE) group.nodes[index].nodeValue = run.text;
+      });
+    }
+    return clone.innerHTML;
+  }
+  function draftMarkdown(rough = false) { return richTextToMarkdown(rough ? roughDraftHtml() : source.innerHTML).markdown; }
+  function snapshot() { return { version: 3, html: sanitizeEditorHtml(source.innerHTML), text: draftMarkdown() }; }
 
   function options() {
-    return { spacing: $('spacing').value, font: $('font').value, linkStyle: $('linkStyle').value, plain };
+    return { spacing: $('spacing').value, font: $('font').value, linkStyle: $('linkStyle').value, mode, plain: mode === 'plain' };
   }
   function notice(message, isError = false, persistent = false) {
     clearTimeout(noticeTimer);
@@ -41,45 +85,69 @@ Keep your **bold text and numbers**, add a little *emphasis*, and give each idea
     $('notice').classList.toggle('error', isError);
     if (!persistent) noticeTimer = setTimeout(() => { $('notice').textContent = ''; }, 6500);
   }
-  function save() {
+  function updateRestore() {
+    $('restoreDraft').hidden = !savedDraft || !!source.textContent.trim();
+  }
+  function savePreferences() {
+    try { localStorage.setItem(preferencesKey, JSON.stringify({ ...options(), richPaste: $('richPaste').checked })); }
+    catch (_) { storageAvailable = false; }
+    if (!storageAvailable) $('saveStatus').textContent = 'Draft kept in this tab';
+  }
+  function flushDraft() {
+    clearTimeout(saveTimer);
+    if (!draftDirty) return;
+    const current = source.textContent.trim() ? snapshot() : null;
+    savedDraft = current;
+    try {
+      if (current) localStorage.setItem(draftKey, JSON.stringify(current));
+      else {
+        localStorage.removeItem(draftKey);
+        localStorage.removeItem('postform.draft.v2');
+        localStorage.removeItem('postform.draft.v1');
+      }
+      $('saveStatus').textContent = current ? 'Draft saved on this device' : 'Draft cleared';
+    } catch (_) { storageAvailable = false; $('saveStatus').textContent = 'Draft kept in this tab'; }
+    updateRestore();
+  }
+  function saveDraft() {
+    draftDirty = true;
     clearTimeout(saveTimer);
     $('saveStatus').textContent = 'Saving…';
-    saveTimer = setTimeout(() => {
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(snapshot()));
-        $('saveStatus').textContent = 'Saved on this device';
-      } catch (_) { $('saveStatus').textContent = 'Draft kept in this tab'; }
-    }, 250);
+    saveTimer = setTimeout(flushDraft, 250);
   }
-  function render(persist = true) {
+  function render(persist = true, draftChanged = false) {
     revision++;
     if (persist) { clearTimeout(noticeTimer); $('notice').textContent = ''; }
     clearTimeout(copyTimer);
     $('copyLabel').textContent = 'Copy post';
-    output.value = PostFormatter.format(draftMarkdown(), options());
+    output.value = PostFormatter.format(draftMarkdown(mode === 'rough'), { ...options(), spacing: mode === 'rough' ? 'roomy' : $('spacing').value });
     source.classList.toggle('is-empty', !source.textContent.trim());
+    source.classList.toggle('rough-active', mode === 'rough');
     const count = PostFormatter.countCodePoints(output.value);
     $('characterCount').textContent = count.toLocaleString() + ' character' + (count === 1 ? '' : 's');
     $('copyPost').disabled = !output.value.trim();
     $('downloadText').disabled = !output.value.trim();
     $('selectOutput').disabled = !output.value;
-    $('unicodeMode').classList.toggle('active', !plain);
-    $('plainMode').classList.toggle('active', plain);
-    $('unicodeMode').setAttribute('aria-pressed', String(!plain));
-    $('plainMode').setAttribute('aria-pressed', String(plain));
-    $('font').disabled = plain;
-    $('outputDescription').textContent = plain ? 'Plain text preview' : 'Unicode preview';
+    for (const name of ['unicode', 'plain', 'rough']) {
+      $(name + 'Mode').classList.toggle('active', mode === name);
+      $(name + 'Mode').setAttribute('aria-pressed', String(mode === name));
+    }
+    $('font').disabled = mode === 'plain';
+    $('spacing').disabled = mode === 'rough';
+    $('roughSpacingNote').hidden = mode !== 'rough';
+    $('capsText').hidden = mode !== 'rough';
+    $('outputDescription').textContent = mode === 'plain' ? 'Plain text preview' : mode === 'rough' ? 'Rough preview · sentence spacing' : 'Unicode preview';
+    updateRestore();
     updateToolbar();
-    if (persist) save();
+    if (persist) savePreferences();
+    if (draftChanged) saveDraft();
   }
-  source.addEventListener('input', () => render());
+  source.addEventListener('input', () => { if (!applyingCaps) render(true, true); });
   for (const key of ['spacing', 'font', 'linkStyle']) $(key).addEventListener('change', () => {
     render();
-    if (key === 'linkStyle' && $('linkStyle').value === 'label') notice('Label only: link destinations are left out of the post.');
   });
-  $('richPaste').addEventListener('change', save);
-  $('unicodeMode').addEventListener('click', () => { plain = false; render(); });
-  $('plainMode').addEventListener('click', () => { plain = true; render(); });
+  $('richPaste').addEventListener('change', savePreferences);
+  for (const name of ['unicode', 'plain', 'rough']) $(name + 'Mode').addEventListener('click', () => { mode = name; render(); });
   // Preserve the native undo stack for paste, formatting, and replacing a draft.
   function rememberSelection() {
     const selection = window.getSelection();
@@ -117,16 +185,146 @@ Keep your **bold text and numbers**, add a little *emphasis*, and give each idea
       range.insertNode(fragment);
       if (last) { range.setStartAfter(last); range.collapse(true); selection.removeAllRanges(); selection.addRange(range); }
     }
-    rememberSelection(); render();
+    rememberSelection(); render(true, true);
   }
   function replaceDraft(text) {
     const range = document.createRange(); range.selectNodeContents(source); editorRange = range;
     insertEditorHtml(PostFormatter.toEditorHtml(text));
-    if (!text) { source.innerHTML = ''; editorRange = null; render(); }
+    if (!text) { source.innerHTML = ''; editorRange = null; render(true, true); }
   }
-  $('clearDraft').addEventListener('click', () => { replaceDraft(''); notice('Draft cleared.'); });
+  $('clearDraft').addEventListener('click', () => { replaceDraft(''); flushDraft(); notice('Draft and saved backup cleared.'); });
+  $('restoreDraft').addEventListener('click', () => {
+    if (!savedDraft || source.textContent.trim()) return;
+    const range = document.createRange(); range.selectNodeContents(source); editorRange = range;
+    insertEditorHtml(sanitizeEditorHtml(savedDraft.html)); flushDraft(); notice('Previous draft restored.');
+  });
   $('loadExample').addEventListener('click', () => { replaceDraft(example); });
   $('selectOutput').addEventListener('click', () => { output.focus(); output.select(); });
+
+  function selectedTextNodes(range) {
+    const walker = document.createTreeWalker(source, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      if (!node.nodeValue || !range.intersectsNode(node)) continue;
+      const start = range.startContainer === node ? range.startOffset : 0;
+      const end = range.endContainer === node ? range.endOffset : node.length;
+      if (end > start && node.nodeValue.slice(start, end).trim()) nodes.push(node);
+    }
+    return nodes;
+  }
+  function restoreTextSelection(start, end) {
+    const walker = document.createTreeWalker(source, NodeFilter.SHOW_TEXT);
+    const range = document.createRange();
+    let offset = 0, started = false, node;
+    while ((node = walker.nextNode())) {
+      if (!started && start <= offset + node.length) { range.setStart(node, Math.max(0, start - offset)); started = true; }
+      if (started && end <= offset + node.length) {
+        range.setEnd(node, Math.max(0, end - offset));
+        const selection = getSelection(); selection.removeAllRanges(); selection.addRange(range); rememberSelection(); return;
+      }
+      offset += node.length;
+    }
+  }
+  function selectionBlock(node) {
+    let element = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
+    return element?.closest('p,div,li,pre,blockquote,h1,h2,h3,h4,h5,h6');
+  }
+  $('capsText').addEventListener('click', () => {
+    if (mode !== 'rough') return;
+    restoreSelection();
+    const selected = getSelection().getRangeAt(0).cloneRange();
+    const nodes = selectedTextNodes(selected);
+    if (!nodes.length) return;
+    const mark = !nodes.every(node => node.parentElement.closest('[data-postform-caps="true"]'));
+    const sourcePrefix = document.createRange(); sourcePrefix.selectNodeContents(source);
+    sourcePrefix.setEnd(selected.startContainer, selected.startOffset);
+    const globalStart = sourcePrefix.toString().length;
+    const globalEnd = globalStart + selected.toString().length;
+    const expanded = selected.cloneRange();
+    const first = selectionBlock(selected.startContainer), last = selectionBlock(selected.endContainer);
+    // Include surrounding inline content so insertHTML cannot inherit a CAPS
+    // wrapper we are removing, and retain inherited bold/italic ancestors.
+    if (first && first !== source) expanded.setStart(first, 0);
+    if (last && last !== source) expanded.setEnd(last, last.childNodes.length);
+    const prefix = expanded.cloneRange(); prefix.setEnd(selected.startContainer, selected.startOffset);
+    const selectedStart = prefix.toString().length;
+    const selectedEnd = selectedStart + selected.toString().length;
+    const fragment = expanded.cloneContents();
+    const oldMarkers = Array.from(fragment.querySelectorAll('[data-postform-caps]'));
+    const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_TEXT);
+    const leaves = [];
+    let node, offset = 0;
+    while ((node = walker.nextNode())) {
+      leaves.push({ node, start: offset, end: offset + node.length, caps: !!node.parentElement?.closest('[data-postform-caps="true"]') });
+      offset += node.length;
+    }
+    for (const leaf of leaves) {
+      const text = leaf.node.nodeValue;
+      const cuts = [0, Math.max(0, Math.min(text.length, selectedStart - leaf.start)), Math.max(0, Math.min(text.length, selectedEnd - leaf.start)), text.length].sort((a, b) => a - b);
+      const replacement = document.createDocumentFragment();
+      for (let index = 1; index < cuts.length; index++) {
+        const from = cuts[index - 1], to = cuts[index];
+        if (to <= from) continue;
+        const inSelection = leaf.start + from >= selectedStart && leaf.start + to <= selectedEnd;
+        const caps = inSelection ? mark : leaf.caps;
+        const part = document.createTextNode(text.slice(from, to));
+        if (caps) {
+          const span = document.createElement('span'); span.dataset.postformCaps = 'true'; span.appendChild(part); replacement.appendChild(span);
+        } else replacement.appendChild(part);
+      }
+      leaf.node.replaceWith(replacement);
+    }
+    // Only unwrap the old markers; new per-leaf markers preserve the selection
+    // without wrapping paragraphs or changing bold/italic ancestors.
+    for (const marker of oldMarkers) marker.replaceWith(...marker.childNodes);
+    const container = document.createElement('div'); container.appendChild(fragment);
+    editorRange = expanded;
+    // Chrome serializes a live text decoration into inline styles during
+    // insertHTML. Hide the annotation cue until the native undoable edit ends.
+    applyingCaps = true;
+    source.classList.remove('rough-active');
+    try {
+      restoreSelection();
+      document.execCommand('insertHTML', false, container.innerHTML);
+    } finally {
+      applyingCaps = false;
+      source.classList.toggle('rough-active', mode === 'rough');
+    }
+    restoreTextSelection(globalStart, globalEnd); render(true, true);
+  });
+
+  function sanitizeEditorHtml(html) {
+    const template = document.createElement('template'); template.innerHTML = html;
+    const rejected = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'OBJECT', 'SVG', 'MATH', 'HEAD', 'META', 'LINK', 'TEMPLATE']);
+    const allowed = new Set(['P', 'DIV', 'BR', 'B', 'STRONG', 'I', 'EM', 'SPAN', 'A', 'UL', 'OL', 'LI', 'CODE', 'PRE', 'BLOCKQUOTE']);
+    function clean(node) {
+      if (node.nodeType === Node.TEXT_NODE) return document.createTextNode(node.nodeValue);
+      if (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) return document.createDocumentFragment();
+      if (rejected.has(node.tagName) || node.hasAttribute?.('hidden')) return document.createDocumentFragment();
+      if (node.tagName === 'IMG') return document.createTextNode(node.getAttribute('alt') || '');
+      const heading = /^H[1-6]$/.test(node.tagName || '');
+      const element = allowed.has(node.tagName) ? document.createElement(node.tagName.toLowerCase()) : heading ? document.createElement('p') : document.createDocumentFragment();
+      if (element.nodeType === Node.ELEMENT_NODE) {
+        if (node.tagName === 'A') {
+          const href = node.getAttribute('href') || '';
+          if (/^(https?:\/\/|mailto:)/i.test(href)) element.setAttribute('href', href);
+        }
+        if (node.tagName === 'OL' || node.tagName === 'LI') {
+          const attr = node.tagName === 'OL' ? 'start' : 'value';
+          if (/^-?\d{1,9}$/.test(node.getAttribute(attr) || '')) element.setAttribute(attr, node.getAttribute(attr));
+        }
+        if (node.tagName === 'SPAN' && node.getAttribute('data-postform-caps') === 'true') element.setAttribute('data-postform-caps', 'true');
+        if (heading) element.style.fontWeight = 'bold';
+        if (/^(normal|bold|bolder|[1-9]00)$/.test(node.style.fontWeight)) element.style.fontWeight = node.style.fontWeight;
+        if (/^(normal|italic|oblique)$/.test(node.style.fontStyle)) element.style.fontStyle = node.style.fontStyle;
+      }
+      for (const child of node.childNodes) element.appendChild(clean(child));
+      return element;
+    }
+    const container = document.createElement('div'); container.appendChild(clean(template.content));
+    return container.innerHTML;
+  }
 
   function updateToolbar() {
     const selection = window.getSelection();
@@ -136,17 +334,20 @@ Keep your **bold text and numbers**, add a little *emphasis*, and give each idea
       try { active = !!inside && document.queryCommandState(command); } catch (_) { /* Browser may not report state. */ }
       $(id).setAttribute('aria-pressed', String(active));
     }
+    const capsNodes = inside && !selection.isCollapsed ? selectedTextNodes(selection.getRangeAt(0)) : [];
+    $('capsText').disabled = !capsNodes.length;
+    $('capsText').setAttribute('aria-pressed', String(capsNodes.length > 0 && capsNodes.every(node => node.parentElement.closest('[data-postform-caps="true"]'))));
   }
   document.addEventListener('selectionchange', () => { rememberSelection(); updateToolbar(); });
   for (const button of document.querySelectorAll('.format-button')) {
     button.addEventListener('mousedown', event => event.preventDefault());
     if (button.dataset.command) button.addEventListener('click', () => {
-      restoreSelection(); document.execCommand(button.dataset.command, false, null); rememberSelection(); render();
+      restoreSelection(); document.execCommand(button.dataset.command, false, null); rememberSelection(); render(true, true);
     });
   }
   source.addEventListener('keydown', event => {
     if ((event.ctrlKey || event.metaKey) && ['b', 'i'].includes(event.key.toLowerCase())) {
-      event.preventDefault(); document.execCommand(event.key.toLowerCase() === 'b' ? 'bold' : 'italic', false, null); rememberSelection(); render();
+      event.preventDefault(); document.execCommand(event.key.toLowerCase() === 'b' ? 'bold' : 'italic', false, null); rememberSelection(); render(true, true);
     }
   });
   const linkDialog = $('linkDialog');
@@ -173,7 +374,7 @@ Keep your **bold text and numbers**, add a little *emphasis*, and give each idea
   });
   $('cancelLink').addEventListener('click', () => { linkDialog.close(); restoreSelection(); });
   $('removeLink').addEventListener('click', () => {
-    linkDialog.close(); restoreSelection(); document.execCommand('unlink', false, null); rememberSelection(); render();
+    linkDialog.close(); restoreSelection(); document.execCommand('unlink', false, null); rememberSelection(); render(true, true);
   });
   $('linkForm').addEventListener('submit', event => {
     event.preventDefault();
@@ -184,7 +385,7 @@ Keep your **bold text and numbers**, add a little *emphasis*, and give each idea
     const label = $('linkText').value;
     linkDialog.close(); restoreSelection();
     if (editorRange && !editorRange.collapsed && editorRange.toString() === label) {
-      document.execCommand('createLink', false, url); rememberSelection(); render();
+      document.execCommand('createLink', false, url); rememberSelection(); render(true, true);
     } else {
       const anchor = document.createElement('a'); anchor.setAttribute('href', url); anchor.textContent = label;
       insertEditorHtml(anchor.outerHTML);
@@ -239,6 +440,7 @@ Keep your **bold text and numbers**, add a little *emphasis*, and give each idea
     clean.querySelector('#source').textContent = '';
     clean.querySelector('#output').textContent = '';
     clean.querySelector('#notice').textContent = '';
+    clean.querySelector('#optionsPanel').removeAttribute('open');
     for (const select of clean.querySelectorAll('select')) for (const option of select.options) option.removeAttribute('selected');
     download('<!doctype html>\n' + clean.outerHTML, 'Postform.html', 'text/html;charset=utf-8');
     notice('App downloaded. Open Postform.html to use it offline.');
@@ -384,10 +586,10 @@ Keep your **bold text and numbers**, add a little *emphasis*, and give each idea
   });
 
   // Exposed for deterministic browser checks; no draft is sent anywhere.
-  window.PostformApp = { richTextToMarkdown, draftMarkdown };
+  window.PostformApp = { richTextToMarkdown, draftMarkdown, sanitizeEditorHtml };
+  $('saveStatus').textContent = storageAvailable ? savedDraft ? 'Previous draft available' : 'Drafts saved on this device' : 'Draft kept in this tab';
   render(false);
-  save();
   window.addEventListener('pagehide', () => {
-    try { localStorage.setItem(storageKey, JSON.stringify(snapshot())); } catch (_) { /* Optional persistence. */ }
+    savePreferences(); flushDraft();
   });
 }());

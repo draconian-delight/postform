@@ -69,17 +69,27 @@ test('keeps working URLs, handles, hashtags, and emails ASCII inside styled text
 
 test('expands Markdown links while formatting their labels', () => {
   assert.equal(format('[**Try Tool0 on GitHub.**](https://example.com/Tool0)'),
-    '𝗧𝗿𝘆 𝗧𝗼𝗼𝗹𝟎 𝗼𝗻 𝗚𝗶𝘁𝗛𝘂𝗯. (https://example.com/Tool0)');
-  assert.equal(format('[Try](https://example.com/a_(b) "optional title")'), 'Try (https://example.com/a_(b))');
-  assert.equal(format('[Try](<https://example.com>)'), 'Try (https://example.com)');
+    '𝗧𝗿𝘆 𝗧𝗼𝗼𝗹𝟎 𝗼𝗻 𝗚𝗶𝘁𝗛𝘂𝗯.: https://example.com/Tool0');
+  assert.equal(format('[Try](https://example.com/a_(b) "optional title")'), 'Try: https://example.com/a_(b)');
+  assert.equal(format('[Try](<https://example.com>)'), 'Try: https://example.com');
+  assert.equal(format('[Try](https://example.com)', { linkStyle: 'inline' }), 'Try (https://example.com)');
   assert.equal(format('[Try](https://example.com)', { linkStyle: 'newline' }), 'Try\nhttps://example.com');
   assert.equal(format('[**Try**](https://example.com)', { linkStyle: 'label' }), '𝗧𝗿𝘆');
+});
+
+test('colon links are the default without duplicated colons or hidden URL destinations', () => {
+  assert.equal(format('[Docs:](https://example.com/A_35?q=Yes)'), 'Docs: https://example.com/A_35?q=Yes');
+  assert.equal(format('[ Docs： ](https://example.com)'), 'Docs： https://example.com');
+  assert.equal(format('[**Docs:**](https://example.com)'), '𝗗𝗼𝗰𝘀: https://example.com');
+  assert.equal(format('[https://example.com](https://example.com)', { linkStyle: 'colon' }), 'https://example.com');
+  assert.equal(format('[Docs](https://example.com)', { linkStyle: 'invalid' }), 'Docs: https://example.com');
+  assert.equal(formatter.toEditorHtml('[**Docs**](https://example.com)'), '<p><a href="https://example.com"><strong>Docs</strong></a></p>');
 });
 
 test('does not duplicate labels already containing the URL; images retain alt and URL', () => {
   assert.equal(format('[https://example.com](https://example.com)'), 'https://example.com');
   assert.equal(format('[**https://example.com**](https://example.com)'), 'https://example.com');
-  assert.equal(format('![Model chart](https://example.com/chart.png)'), 'Model chart (https://example.com/chart.png)');
+  assert.equal(format('![Model chart](https://example.com/chart.png)'), 'Model chart: https://example.com/chart.png');
   assert.equal(format('![](https://example.com/chart.png)'), 'https://example.com/chart.png');
   assert.equal(format('<https://example.com>'), 'https://example.com');
 });
@@ -152,6 +162,71 @@ test('empty input and actual Unicode code-point counts are well defined', () => 
   assert.equal(countCodePoints('𝗯𝟑📱'), 3);
   assert.equal(countCodePoints('👩🏽‍💻'), 4); // Code points, not graphemes or platform-weighted counts.
   assert.equal(countCodePoints(null), 0);
+});
+
+test('rough transform keeps run count and metadata without mutating inputs', () => {
+  const input = Object.freeze([
+    Object.freeze({ text: 'FIRST.', key: 1 }),
+    Object.freeze({ text: ' ', caps: true, key: 2 }),
+    Object.freeze({ text: 'SECOND', key: 3 })
+  ]);
+  const result = formatter.transformRoughRuns(input);
+  assert.deepEqual(result, [{ text: 'first.', key: 1 }, { text: '\n\n', caps: true, key: 2 }, { text: 'second', key: 3 }]);
+  assert.notEqual(result, input);
+  result.forEach((run, index) => assert.notEqual(run, input[index]));
+  assert.equal(input[0].text, 'FIRST.');
+  assert.deepEqual(formatter.transformRoughRuns([]), []);
+  assert.deepEqual(formatter.transformRoughRuns(null), []);
+});
+
+test('rough casing preserves technical terms across style boundaries and separated units', () => {
+  const input = [{ text: 'RUN MODELS LOCALLY WITH AI AND MLX. An i' }, { text: 'Phone', bold: true }, { text: ' uses Edge0, OpenAI, 35B, M4-Pro, v2.1, 1 GiB, 24 GB, 35 B and 6.4 tokens/second.' }];
+  const result = formatter.transformRoughRuns(input, { sentenceSpacing: false });
+  assert.equal(result.map(run => run.text).join(''), 'run models locally with AI and MLX. an iPhone uses Edge0, OpenAI, 35B, M4-Pro, v2.1, 1 GiB, 24 GB, 35 B and 6.4 tokens/second.');
+  assert.equal(result[1].text, 'Phone');
+  assert.equal(result[1].bold, true);
+  assert.equal(formatter.transformRoughRuns([{ text: 'Bytes AND BITS IN A MIN' }], { sentenceSpacing: false })[0].text, 'bytes and bits in a min');
+});
+
+test('manual rough CAPS wins over ordinary casing but not URLs, identities, footnotes or code', () => {
+  const input = [
+    { text: 'Run Edge0 with iPhone via https://Example.com/A_35?Model=YES and @Alex_35 #MyTag Help@Example.com [1] [^note]. ', caps: true },
+    { text: 'const Run = `Keep.Mixed`;\n  Exact 35B', caps: true, literal: true }
+  ];
+  assert.equal(formatter.transformRoughRuns(input, { sentenceSpacing: false }).map(run => run.text).join(''),
+    'RUN EDGE0 WITH IPHONE VIA https://Example.com/A_35?Model=YES AND @Alex_35 #MyTag Help@Example.com [1] [^note]. const Run = `Keep.Mixed`;\n  Exact 35B');
+  assert.equal(formatter.transformRoughRuns([{ text: 'try Example.com/A_35?Model=YES now', caps: true }], { sentenceSpacing: false })[0].text,
+    'TRY Example.com/A_35?Model=YES NOW');
+});
+
+test('rough casing strips known Unicode styles from prose while preserving protected bytes', () => {
+  assert.equal(formatter.transformRoughRuns([{ text: '𝗛𝗘𝗟𝗟𝗢 𝗔𝗜 𝟑𝟓𝗕 and https://example.com/𝗔𝟑' }], { sentenceSpacing: false })[0].text,
+    'hello AI 35B and https://example.com/𝗔𝟑');
+  assert.equal(formatter.transformRoughRuns([{ text: '你好 café 👩🏽‍💻' }], { sentenceSpacing: false })[0].text, '你好 café 👩🏽‍💻');
+});
+
+test('rough sentence spacing handles terminal punctuation, quotes and Chinese without changing wording', () => {
+  assert.equal(formatter.transformRoughRuns([{ text: 'He said “READY!” Then left. Fine? Yes。中文继续！还有吗？结束。' }])[0].text,
+    'he said “ready!”\n\nthen left.\n\nfine?\n\nyes。\n\n中文继续！\n\n还有吗？\n\n结束。');
+  assert.equal(formatter.transformRoughRuns([{ text: 'First.\n\n\nSecond!Next' }])[0].text, 'first.\n\nsecond!\n\nnext');
+});
+
+test('rough sentence spacing skips URL queries, decimals, versions and common abbreviations', () => {
+  const source = 'Dr. Smith uses v2.1.0 at 6.4 tokens/s, e.g. on U.S. hardware. Visit https://Example.com/A?One=1&Two=2. Done!';
+  assert.equal(formatter.transformRoughRuns([{ text: source }])[0].text,
+    'dr. smith uses v2.1.0 at 6.4 tokens/s, e.g. on U.S. hardware.\n\nvisit https://Example.com/A?One=1&Two=2.\n\ndone!');
+  assert.equal(formatter.transformRoughRuns([{ text: 'Mr. Jones met J. Smith, i.e. a colleague.' }])[0].text,
+    'mr. jones met j. smith, i.e. a colleague.');
+});
+
+test('rough sentence spacing respects atomic labels, code, lists and cross-run punctuation', () => {
+  const input = [{ text: 'Try. Now!', atomic: true }, { text: ' Then use ' }, { text: 'do.This();\n x = 6.4;', literal: true }, { text: ' carefully. End.' }];
+  const result = formatter.transformRoughRuns(input);
+  assert.equal(result.map(run => run.text).join(''), 'try. now! then use do.This();\n x = 6.4; carefully.\n\nend.');
+  assert.equal(result[0].text, 'try. now!');
+  assert.equal(result[2].text, input[2].text);
+  assert.equal(formatter.transformRoughRuns([{ text: 'First. Second!' }], { sentenceSpacing: false })[0].text, 'first. second!');
+  assert.equal(formatter.transformRoughRuns([{ text: 'First.' }, { text: ' ” Second?' }]).map(run => run.text).join(''), 'first.\n\n” second?');
 });
 
 test('complete sample post retains content, destinations, footnotes, and requested formatting', () => {

@@ -29,3 +29,27 @@
 @media(max-width:750px){.masthead{height:66px}.platform-label{font-size:12px;padding:6px 8px}.page-heading{padding:12px 0 22px}.rich-editor{height:300px}.output-card textarea{height:320px}.format-button{width:44px;height:44px}}
 @media(max-width:380px){.output-heading h2{max-width:120px;line-height:1.35}.format-button{width:44px}.toolbar-divider{margin:0 4px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+/* Output styles stay visible; secondary controls expand above the draft. */
+.header-links{display:flex;align-items:center;gap:18px}
+.github-link{color:var(--primary);font-size:14px;font-weight:600;text-decoration:none;padding:8px 0}
+.github-link:hover{text-decoration:underline;text-underline-offset:3px}
+.workspace-controls{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;margin-bottom:18px}
+.output-mode-bar{grid-area:1/1;width:max-content;max-width:100%;position:relative;z-index:1}
+.output-mode-bar .format-mode{height:44px;min-width:226px}
+.workspace-controls .options-panel{grid-area:1/1;margin:0;border:0;padding:0;border-radius:0;background:transparent}
+.workspace-controls .options-panel>summary{display:flex;width:max-content;min-height:44px;margin-left:auto;padding:10px 5px}
+.workspace-controls .options-panel[open]>summary{min-height:44px}
+.workspace-controls .options-content{margin-top:14px;padding:20px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.workspace-controls .settings-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.rough-spacing-note{font-size:12px;line-height:1.5;color:var(--muted)}
+.draft-actions{display:flex;align-items:center;gap:14px}
+#restoreDraft[hidden],#capsText[hidden]{display:none}
+.editor-toolbar{height:auto;min-height:58px;flex-wrap:wrap;row-gap:5px}
+.caps-button{font-size:10px;font-weight:700;letter-spacing:.3px}
+.caps-button:disabled{color:#6b7588}
+.rich-editor.rough-active [data-postform-caps="true"]{text-decoration-line:underline;text-decoration-style:dotted;text-decoration-color:var(--primary);text-underline-offset:4px}
+.setting select:disabled{background:#edf0f7;color:var(--muted)}
+@media(max-width:750px){.output-mode-bar .format-mode{min-width:211px}.workspace-controls .options-content{padding:16px}.workspace-controls .settings-grid{grid-template-columns:1fr 1fr}.draft-actions{gap:10px}.draft-actions .text-button{font-size:12px}}
+@media(max-width:450px){.header-links .platform-label{display:none}.header-links{gap:0}.draft-actions{gap:7px}.output-mode-bar .format-mode{min-width:200px}.output-mode-bar .mode-button{font-size:12px;padding:5px 8px}}
+@media(max-width:380px){.output-mode-bar .format-mode{min-width:190px}.workspace-controls .settings-grid{grid-template-columns:1fr}.workspace-controls .options-panel>summary{font-size:13px;gap:5px}.draft-actions .text-button{font-size:11px}.draft-actions{gap:6px}}
